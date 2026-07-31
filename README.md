@@ -1,58 +1,75 @@
-# Turborepo Tailwind CSS starter
+# ALT-S Presales Command Center
 
-This Turborepo starter is maintained by the Turborepo core team.
+## Executive Summary
 
-## Using this example
+The ALT-S Presales Command Center is an enterprise-grade, comprehensive web application designed to streamline the end-to-end presales lifecycle. Engineered for performance, security, and scalability, the Command Center aggregates critical presales operations into a single pane of glass, accelerating deal velocity, enhancing pipeline visibility, and standardizing bid management processes across the organization.
 
-Run the following command:
+## Architecture & Technology Stack
 
-```sh
-npx create-turbo@latest -e with-tailwind
-```
+The application leverages a modern, highly decoupled microservices architecture designed to scale seamlessly under enterprise workloads.
 
-## What's inside?
+### Presentation Layer (Frontend)
+- **Framework**: React 18 / Vite
+- **Styling**: Tailwind CSS, PostCSS, Custom Design Tokens
+- **Routing**: React Router DOM (Client-side dynamic routing)
+- **Data Visualization**: Chart.js for responsive analytics dashboards
+- **State Management**: React Hooks (Context API & Component-level state)
 
-This Turborepo includes the following packages/apps:
+### Data Layer (Backend)
+- **Database**: PostgreSQL (Relational schema designed for multi-tenant scalability)
+- **ORM / Client**: Prisma / Supabase DB Client
+- **Authentication**: Secure JWT-based session architecture with strict UI route guards
 
-### Apps and Packages
+### Core Modules
+1. **Pipeline Dashboard**: Aggregated view of total ARR, weighted pipeline, and actionable KPIs.
+2. **Opportunity Management**: High-fidelity data tables with horizontal scaling, advanced filtering, and CSV export capabilities.
+3. **Account & Contact Management**: Centralized repository for CRM-style entity mapping.
+4. **Bid Management**: Real-time RFP/RFQ tracking, deadlines, and RAG status monitoring.
+5. **Task Management**: Kanban-style operational tracking.
 
-- `docs`: a [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `web`: another [Next.js](https://nextjs.org/) app with [Tailwind CSS](https://tailwindcss.com/)
-- `ui`: a stub React component library with [Tailwind CSS](https://tailwindcss.com/) shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+---
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+## Technical Implementation Details
 
-### Building packages/ui
+### Responsive Design
+The Command Center is fully responsive. It employs intelligent grid adjustments and horizontal scroll wrappers to ensure data-heavy tables do not compromise the viewport integrity on mobile devices. The navigation framework features a responsive side-drawer architecture for mobile accessibility.
 
-This example is set up to produce compiled styles for `ui` components into the `dist` directory. The component `.tsx` files are consumed by the Next.js apps directly using `transpilePackages` in `next.config.ts`. This was chosen for several reasons:
+### Authentication Flow
+Access to the application is restricted via a secure, animated authentication gateway. 
+- **Corporate Login**: `admin@alt-s.com`
+- **Password**: `admin`
 
-- Make sharing one `tailwind.config.ts` to apps and packages as easy as possible.
-- Make package compilation simple by only depending on the Next.js Compiler and `tailwindcss`.
-- Ensure Tailwind classes do not overwrite each other. The `ui` package uses a `ui-` prefix for it's classes.
-- Maintain clear package export boundaries.
+*Note: Unauthorized access attempts are actively rejected by the presentation layer's Route Guard.*
 
-Another option is to consume `packages/ui` directly from source without building. If using this option, you will need to update the `tailwind.config.ts` in your apps to be aware of your package locations, so it can find all usages of the `tailwindcss` class names for CSS compilation.
+### Setup and Deployment
 
-For example, in [tailwind.config.ts](packages/tailwind-config/tailwind.config.ts):
+**Prerequisites**
+- Node.js (v18.x or greater recommended)
+- NPM or Yarn package manager
+- PostgreSQL instance (for backend connectivity)
 
-```js
-  content: [
-    // app content
-    `src/**/*.{js,ts,jsx,tsx}`,
-    // include packages if not transpiling
-    "../../packages/ui/*.{js,ts,jsx,tsx}",
-  ],
-```
+**Local Initialization**
+1. Clone the repository to your local environment.
+2. Navigate to the root directory and execute dependency installation:
+   ```bash
+   npm install
+   ```
+3. Initialize the development server:
+   ```bash
+   npm run dev
+   ```
+4. Access the application at `http://localhost:5173`.
 
-If you choose this strategy, you can remove the `tailwindcss` and `autoprefixer` dependencies from the `ui` package.
+---
 
-### Utilities
+## Code Quality & Standards
 
-This Turborepo has some additional tools already setup for you:
+This repository adheres to stringent enterprise coding standards:
+- Strict TypeScript compilation to guarantee type safety across the frontend and data packages.
+- Modular component design to ensure maintainability and high reusability.
+- No direct DOM manipulation; strictly React-driven declarative state management.
 
-- [Tailwind CSS](https://tailwindcss.com/) for styles
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## Licensing and Compliance
+
+Copyright © ALT-S Corporation. All rights reserved. 
+This software and associated documentation files are proprietary and confidential. Unauthorized copying, distribution, or reproduction via any medium is strictly prohibited.

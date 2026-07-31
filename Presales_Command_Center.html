@@ -1,0 +1,1096 @@
+<div id="app"></div>
+<style>
+  :root{
+    --navy:#1E2761; --navy-deep:#141B4D; --ice:#CADCFC; --ice-soft:#EEF3FE;
+    --canvas:#F7F8FB; --card:#FFFFFF; --ink:#1F2937; --muted:#6B7280;
+    --border:#E5E7EB;
+    --green:#2E7D32; --green-bg:#E8F5E9;
+    --amber:#B15C00; --amber-bg:#FFF3E0;
+    --red:#C62828; --red-bg:#FDECEA;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  #app{
+    font-family:"Inter","Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--ink); background:var(--canvas); min-height:100vh;
+    display:flex; flex-direction:column;
+  }
+  .display{font-family:Cambria,Georgia,serif;}
+
+  /* Header */
+  .header{background:var(--navy); color:#fff; padding:20px 28px 0 28px;}
+  .header-top{display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .brand{font-size:22px; font-weight:700;}
+  .brand small{display:block; font-size:11px; font-weight:400; letter-spacing:1.5px; color:var(--ice); margin-top:2px;}
+  .tabs{display:flex; gap:4px; margin-top:16px;}
+  .tab{
+    padding:10px 18px; font-size:13.5px; font-weight:600; color:var(--ice);
+    background:transparent; border:none; cursor:pointer; border-radius:8px 8px 0 0;
+    transition:background .15s, color .15s;
+  }
+  .tab:hover{background:rgba(255,255,255,.08);}
+  .tab.active{background:var(--canvas); color:var(--navy);}
+
+  /* Pulse strip */
+  .pulse{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+    padding:18px 28px; background:var(--canvas);
+  }
+  .pulse-card{
+    background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+    padding:14px 16px; position:relative; overflow:hidden;
+  }
+  .pulse-card .val{font-size:26px; font-weight:700; color:var(--navy); line-height:1.1;}
+  .pulse-card .lbl{font-size:11.5px; color:var(--muted); margin-top:3px;}
+  .pulse-card::before{
+    content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--ice);
+  }
+  .pulse-card.risk::before{background:var(--red);}
+
+  /* Main */
+  .main{flex:1; padding:6px 28px 40px 28px;}
+  .panel{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:20px;}
+  .panel-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .panel-title{font-size:17px; font-weight:700; color:var(--navy);}
+  .btn{
+    border:none; border-radius:8px; padding:9px 16px; font-size:13px; font-weight:600;
+    cursor:pointer; transition:transform .1s, opacity .15s;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{opacity:.9;}
+  .btn-ghost{background:transparent; color:var(--navy); border:1px solid var(--border);}
+  .btn-ghost:hover{background:var(--ice-soft);}
+  .btn-sm{padding:5px 10px; font-size:12px;}
+  .btn-danger-ghost{background:transparent; color:var(--red); border:1px solid var(--red-bg);}
+
+  table{width:100%; border-collapse:collapse; font-size:13px;}
+  th{
+    text-align:left; padding:9px 10px; background:var(--ice-soft); color:var(--navy);
+    font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; font-weight:700;
+    border-bottom:2px solid var(--border);
+  }
+  td{padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:middle;}
+  tr:hover td{background:#FBFCFE;}
+  tr.row-active td{background:#EEF4FF;}
+  tr.row-active:hover td{background:#E1EBFC;}
+  .row-actions{display:flex; gap:6px;}
+  .empty-state{padding:30px; text-align:center; color:var(--muted); font-size:13.5px;}
+
+  .badge{display:inline-block; padding:3px 10px; border-radius:999px; font-size:11.5px; font-weight:700;}
+  .badge-green{background:var(--green-bg); color:var(--green);}
+  .badge-amber{background:var(--amber-bg); color:var(--amber);}
+  .badge-red{background:var(--red-bg); color:var(--red);}
+  .badge-gray{background:#F0F1F3; color:var(--muted);}
+  .badge-purple{background:#F3E8FF; color:#7C3AED;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  /* Drawer */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,27,77,.35); opacity:0; pointer-events:none;
+    transition:opacity .2s; z-index:40;
+  }
+  .overlay.open{opacity:1; pointer-events:auto;}
+  .drawer{
+    position:fixed; top:0; right:-460px; width:440px; max-width:92vw; height:100vh;
+    background:var(--card); box-shadow:-8px 0 24px rgba(20,27,77,.15);
+    transition:right .25s ease; z-index:50; display:flex; flex-direction:column;
+  }
+  .drawer.open{right:0;}
+  .drawer-head{padding:20px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
+  .drawer-head h3{margin:0; font-size:17px; color:var(--navy);}
+  .drawer-close{background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); line-height:1;}
+  .drawer-body{padding:20px 22px; overflow-y:auto; flex:1;}
+  .drawer-foot{padding:16px 22px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end;}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:5px;}
+  .field input, .field select, .field textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:7px;
+    font-size:13.5px; font-family:inherit; color:var(--ink); background:#fff;
+  }
+  .field textarea{resize:vertical; min-height:56px;}
+  .field-row{display:flex; gap:10px;}
+  .field-row .field{flex:1;}
+
+  .dash-grid{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  .mini-row{display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid var(--border); font-size:13px;}
+  .mini-row:last-child{border-bottom:none;}
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--navy-deep); color:#fff; padding:10px 18px; border-radius:8px; font-size:13px;
+    opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:60;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  @media (max-width: 900px){
+    .pulse{grid-template-columns:1fr 1fr;}
+    .dash-grid{grid-template-columns:1fr;}
+    table{font-size:12px;}
+  }
+
+  /* Kanban */
+  .kanban-board{display:flex; gap:14px; overflow-x:auto; padding-bottom:10px; align-items:flex-start;}
+  .kanban-col{flex:0 0 260px; background:var(--canvas); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden;}
+  .kanban-col-head{
+    display:flex; justify-content:space-between; align-items:center; padding:10px 12px;
+    font-size:12.5px; font-weight:700; color:var(--ink); border-top:4px solid var(--ice);
+  }
+  .kanban-col-head .kcount{background:rgba(0,0,0,.08); border-radius:999px; padding:1px 8px; font-size:11px;}
+  .kanban-col-body{padding:10px; display:flex; flex-direction:column; gap:10px; min-height:60px; max-height:560px; overflow-y:auto;}
+  .kanban-card{
+    background:#fff; border:1px solid var(--border); border-left:4px solid var(--ice);
+    border-radius:8px; padding:10px 12px; font-size:12.5px;
+  }
+  .kc-top{display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;}
+  .kc-title{font-weight:700; color:var(--navy); margin-bottom:4px; line-height:1.3;}
+  .kc-meta{color:var(--muted); font-size:11.5px; margin-bottom:2px;}
+
+  /* Charts */
+  .charts-row{display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-bottom:20px;}
+  .chart-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px;}
+  .chart-wrap{position:relative; height:220px;}
+  .chart-hint{font-size:11px; color:var(--muted); text-align:center; margin-top:8px;}
+  .drill-panel{border:1.5px solid var(--ice); background:var(--ice-soft);}
+  .drill-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;}
+  @media (max-width: 1100px){
+    .charts-row{grid-template-columns:1fr;}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+(function(){
+  const OPP_OPTS = {
+    bidType: ["New Account New Business","Existing Account New Business","Existing Account Change Request"],
+    opportunityType: ["Implementation","Resource Augmentation","Enhancement","Managed Services"],
+    stage: ["Qualification","Discovery","Solution Design","Proposal/RFP Submitted","Proposal Presentation","Negotiation","Closed Won","Closed Lost"],
+    priority: ["High","Medium","Low"],
+  };
+  const ACC_OPTS = {
+    tier: ["Strategic","Key","Standard"],
+    health: ["Green","Yellow","Red"],
+  };
+  const TASK_OPTS = {
+    category: ["Presales Management","Bid Management","Account Management","Internal/Admin"],
+    priority: ["High","Medium","Low"],
+    status: ["Not Started","In Progress","Bottlenecks","Done"],
+    bottleneckType: ["Client","Internal","Other"],
+  };
+  const COLUMN_COLORS = {
+    "Not Started": {bar:"#9CA3AF", bg:"#F3F4F6"},
+    "In Progress": {bar:"#2563EB", bg:"#EFF6FF"},
+    "Bottlenecks": {bar:"#7C3AED", bg:"#F3E8FF"},
+    "Done": {bar:"#2E7D32", bg:"#E8F5E9"},
+  };
+  const PRIORITY_COLORS = { High:"#C62828", Medium:"#B15C00", Low:"#2E7D32" };
+  const ENTITY_SEED = ["ALT-S", "Infodrive Analytics", "Sifratech"];
+
+  function entityOptsHtml(selected){
+    let html = '<option value="">Select…</option>';
+    state.entityOptions.forEach(e=>{
+      html += `<option value="${escapeHtml(e)}" ${e===selected ? "selected" : ""}>${escapeHtml(e)}</option>`;
+    });
+    html += `<option value="__new__">+ Add New Entity / Partner…</option>`;
+    return html;
+  }
+  function accountOptsHtml(selected){
+    let html = '<option value="">Select…</option>';
+    [...state.accounts].sort((a,b)=>(a.name||"").localeCompare(b.name||"")).forEach(a=>{
+      html += `<option value="${escapeHtml(a.name)}" ${a.name===selected ? "selected" : ""}>${escapeHtml(a.accId||"")} — ${escapeHtml(a.name)}</option>`;
+    });
+    html += `<option value="__new__">+ Add New Account…</option>`;
+    return html;
+  }
+
+  const state = { tab: "dashboard", opportunities: [], accounts: [], tasks: [], entityOptions: [], loaded: false, charts: {}, drill: null };
+
+  function destroyCharts(){
+    Object.keys(state.charts).forEach(k=>{
+      if(state.charts[k]){ state.charts[k].destroy(); state.charts[k] = null; }
+    });
+  }
+
+  function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+  function nextSeqId(list, field, prefix){
+    let max = 0;
+    const re = new RegExp("^" + prefix + "-(\\d+)$");
+    list.forEach(item=>{
+      const m = (item[field] || "").match(re);
+      if(m){ const n = parseInt(m[1],10); if(n > max) max = n; }
+    });
+    return prefix + "-" + String(max + 1).padStart(4,"0");
+  }
+  function genOppId(){ return nextSeqId(state.opportunities, "oppId", "OPP"); }
+  function genAccId(){ return nextSeqId(state.accounts, "accId", "ACC"); }
+  function relatedOptionsHtml(selectedType, selectedId){
+    let html = '<option value="">— None —</option>';
+    if(state.opportunities.length){
+      html += '<optgroup label="Opportunities">';
+      state.opportunities.forEach(o=>{
+        const sel = (selectedType==="opp" && selectedId===o.id) ? "selected" : "";
+        html += `<option value="opp:${o.id}" ${sel}>${escapeHtml(o.oppId||"")} — ${escapeHtml(o.name||"(untitled)")}</option>`;
+      });
+      html += '</optgroup>';
+    }
+    if(state.accounts.length){
+      html += '<optgroup label="Accounts">';
+      state.accounts.forEach(a=>{
+        const sel = (selectedType==="acc" && selectedId===a.id) ? "selected" : "";
+        html += `<option value="acc:${a.id}" ${sel}>${escapeHtml(a.accId||"")} — ${escapeHtml(a.name||"(untitled)")}</option>`;
+      });
+      html += '</optgroup>';
+    }
+    return html;
+  }
+  function relatedLabel(t){
+    if(t.relatedType==="opp"){
+      const o = state.opportunities.find(x=>x.id===t.relatedId);
+      return o ? `${o.oppId||""} — ${o.name||"(untitled)"}` : "[opportunity removed]";
+    }
+    if(t.relatedType==="acc"){
+      const a = state.accounts.find(x=>x.id===t.relatedId);
+      return a ? `${a.accId||""} — ${a.name||"(untitled)"}` : "[account removed]";
+    }
+    return t.relatedTo || "—";
+  }
+  function fmtMoney(n){ if(n===undefined||n===null||n==="") return "$0"; return "$" + Math.round(Number(n)).toLocaleString(); }
+  function daysUntil(dateStr){
+    if(!dateStr) return null;
+    const today = new Date(); today.setHours(0,0,0,0);
+    const d = new Date(dateStr + "T00:00:00");
+    return Math.round((d - today) / 86400000);
+  }
+  function escapeHtml(s){ return (s===undefined||s===null?"":String(s)).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+
+  async function loadAll(){
+    for(const key of ["opportunities","accounts","tasks"]){
+      try{
+        const res = await window.storage.get(key, false);
+        state[key] = res && res.value ? JSON.parse(res.value) : [];
+      }catch(e){ state[key] = []; }
+    }
+    let entityOptionsIsNew = false;
+    try{
+      const res = await window.storage.get("entityOptions", false);
+      state.entityOptions = res && res.value ? JSON.parse(res.value) : ENTITY_SEED.slice();
+    }catch(e){ state.entityOptions = ENTITY_SEED.slice(); entityOptionsIsNew = true; }
+
+    // Migration: backfill IDs for any records saved before ID auto-assignment existed
+    let oppsChanged = false, accsChanged = false, tasksChanged = false;
+    state.opportunities.forEach(o=>{ if(!o.oppId){ o.oppId = genOppId(); oppsChanged = true; } });
+    state.accounts.forEach(a=>{ if(!a.accId){ a.accId = genAccId(); accsChanged = true; } });
+    // Migration: collapse old Waiting on Client / Waiting on Internal / Blocked statuses into Bottlenecks
+    const statusMigration = { "Waiting on Client":"Client", "Waiting on Internal":"Internal", "Blocked":"Other" };
+    state.tasks.forEach(t=>{
+      if(statusMigration[t.status]){
+        t.bottleneckType = statusMigration[t.status];
+        t.status = "Bottlenecks";
+        tasksChanged = true;
+      }
+    });
+    if(oppsChanged) await persist("opportunities");
+    if(accsChanged) await persist("accounts");
+    if(tasksChanged) await persist("tasks");
+    if(entityOptionsIsNew) await persist("entityOptions");
+    state.loaded = true;
+    render();
+  }
+  async function persist(key){
+    try{ await window.storage.set(key, JSON.stringify(state[key]), false); }
+    catch(e){ showToast("Couldn't save — please retry."); }
+  }
+
+  async function ensureAccountExists(accountName){
+    if(!accountName) return null;
+    const trimmed = accountName.trim();
+    if(!trimmed) return null;
+    const exists = state.accounts.some(a => (a.name||"").trim().toLowerCase() === trimmed.toLowerCase());
+    if(exists) return null;
+    const newAcc = {
+      id: uid(), accId: genAccId(), name: trimmed,
+      owner: "", tier: "", arr: 0, health: "", renewalDate: "",
+      upsellPotential: 0, stakeholders: "", nextSteps: "",
+    };
+    state.accounts.push(newAcc);
+    await persist("accounts");
+    const autoTasks = buildAutoTasksForAccount(newAcc);
+    if(autoTasks.length){
+      state.tasks.push(...autoTasks);
+      await persist("tasks");
+    }
+    return newAcc;
+  }
+
+  function buildAutoTasksForOpportunity(rec){
+    const label = rec.name || rec.account || "(untitled opportunity)";
+    const base = {
+      owner: rec.owner || "", category: "Bid Management",
+      relatedType: "opp", relatedId: rec.id,
+      priority: "High", status: "Not Started", bottleneckType: "",
+    };
+    const tasks = [];
+    if(rec.preBidKickoffDate){
+      tasks.push({ ...base, id: uid(), task: `Attend pre-bid kick-off — ${label}`, dueDate: rec.preBidKickoffDate });
+    }
+    if(rec.clarificationDeadline){
+      tasks.push({ ...base, id: uid(), task: `Submit clarification questions — ${label}`, dueDate: rec.clarificationDeadline });
+    }
+    if(rec.deadline){
+      tasks.push({ ...base, id: uid(), task: `Submit proposal / RFP — ${label}`, dueDate: rec.deadline });
+    }
+    tasks.push({ ...base, id: uid(), task: `Prepare proposal presentation — ${label}`, dueDate: rec.deadline || "" });
+    return tasks;
+  }
+
+  function buildAutoTasksForAccount(rec){
+    const label = rec.name || "(untitled account)";
+    const base = {
+      owner: rec.owner || "", category: "Account Management",
+      relatedType: "acc", relatedId: rec.id,
+      status: "Not Started", bottleneckType: "",
+    };
+    const tasks = [];
+    if(rec.renewalDate){
+      tasks.push({ ...base, id: uid(), task: `Prepare renewal — ${label}`, dueDate: rec.renewalDate, priority: "High" });
+    }
+    if(rec.health === "Red"){
+      tasks.push({ ...base, id: uid(), task: `Address account health risk — ${label}`, dueDate: "",
+        priority: "High", status: "Bottlenecks", bottleneckType: "Client" });
+    } else if(rec.health === "Yellow"){
+      tasks.push({ ...base, id: uid(), task: `Monitor account health — ${label}`, dueDate: "", priority: "Medium" });
+    }
+    if(Number(rec.upsellPotential) > 0){
+      tasks.push({ ...base, id: uid(), task: `Pursue upsell opportunity — ${label}`, dueDate: "", priority: "Medium" });
+    }
+    tasks.push({ ...base, id: uid(), task: `Schedule onboarding / relationship kick-off — ${label}`, dueDate: "", priority: "Medium" });
+    return tasks;
+  }
+
+  function showToast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(showToast._h);
+    const duration = Math.min(2200 + Math.max(0, msg.length - 20) * 30, 5000);
+    showToast._h = setTimeout(()=>t.classList.remove("show"), duration);
+  }
+
+  // ---------- Stats ----------
+  function computeStats(){
+    const weightedPipeline = state.opportunities
+      .filter(o => o.stage !== "Closed Won" && o.stage !== "Closed Lost")
+      .reduce((s,o)=> s + (Number(o.dealValue)||0) * (Number(o.probability)||0), 0);
+    const totalArr = state.accounts.reduce((s,a)=> s + (Number(a.arr)||0), 0);
+    const openTasks = state.tasks.filter(t => t.status !== "Done").length;
+
+    let overdue = 0;
+    state.opportunities.forEach(o=>{
+      if(o.stage==="Closed Won"||o.stage==="Closed Lost") return;
+      const d = daysUntil(o.deadline);
+      if(d!==null && d<0) overdue++;
+    });
+    state.tasks.forEach(t=>{
+      if(t.status==="Done") return;
+      const d = daysUntil(t.dueDate);
+      if(d!==null && d<0) overdue++;
+    });
+    state.accounts.forEach(a=>{
+      const d = daysUntil(a.renewalDate);
+      if(d!==null && d<0 && a.health!=="Green") overdue++;
+    });
+
+    const bottlenecks = state.tasks.filter(t => t.status === "Bottlenecks").length;
+    let dueThisWeek = 0;
+    state.tasks.forEach(t=>{
+      if(t.status==="Done") return;
+      const d = daysUntil(t.dueDate);
+      if(d!==null && d>=0 && d<=7) dueThisWeek++;
+    });
+
+    return { weightedPipeline, totalArr, openTasks, overdue, bottlenecks, dueThisWeek };
+  }
+
+  function ragBadge(status){
+    const map = { Green:"badge-green", Yellow:"badge-amber", Red:"badge-red",
+      High:"badge-red", Medium:"badge-amber", Low:"badge-green",
+      "Closed Won":"badge-green", "Closed Lost":"badge-red",
+      Done:"badge-green", Bottlenecks:"badge-purple" };
+    const cls = map[status] || "badge-gray";
+    return `<span class="badge ${cls}">${escapeHtml(status||"—")}</span>`;
+  }
+  function deadlineBadge(days){
+    if(days===null) return '<span class="badge badge-gray">—</span>';
+    if(days<0) return `<span class="badge badge-red">${Math.abs(days)}d overdue</span>`;
+    if(days<=7) return `<span class="badge badge-red">${days}d</span>`;
+    if(days<=14) return `<span class="badge badge-amber">${days}d</span>`;
+    return `<span class="badge badge-green">${days}d</span>`;
+  }
+
+  // ---------- Render ----------
+  function render(){
+    destroyCharts();
+    const app = document.getElementById("app");
+    const stats = computeStats();
+    const pulseHtml = state.tab === "tasks"
+      ? `
+        <div class="pulse-card"><div class="val num">${stats.openTasks}</div><div class="lbl">Open Tasks</div></div>
+        <div class="pulse-card ${stats.overdue>0?'risk':''}"><div class="val num">${stats.overdue}</div><div class="lbl">Overdue Items</div></div>
+        <div class="pulse-card ${stats.bottlenecks>0?'risk':''}"><div class="val num">${stats.bottlenecks}</div><div class="lbl">Bottlenecks</div></div>
+        <div class="pulse-card"><div class="val num">${stats.dueThisWeek}</div><div class="lbl">Due This Week</div></div>
+      `
+      : `
+        <div class="pulse-card"><div class="val num">${fmtMoney(stats.weightedPipeline)}</div><div class="lbl">Weighted Pipeline</div></div>
+        <div class="pulse-card"><div class="val num">${fmtMoney(stats.totalArr)}</div><div class="lbl">Total ARR</div></div>
+        <div class="pulse-card"><div class="val num">${stats.openTasks}</div><div class="lbl">Open Tasks</div></div>
+        <div class="pulse-card ${stats.overdue>0?'risk':''}"><div class="val num">${stats.overdue}</div><div class="lbl">Overdue Items</div></div>
+      `;
+    app.innerHTML = `
+      <div class="header">
+        <div class="header-top">
+          <div class="brand display">ALT-S Presales Command Center
+            <small>PRESALES · BID · ACCOUNT MANAGEMENT</small>
+          </div>
+        </div>
+        <div class="tabs">
+          ${tabBtn("dashboard","Dashboard")}
+          ${tabBtn("opportunities","Opportunity Management")}
+          ${tabBtn("accounts","Account Management")}
+          ${tabBtn("tasks","Task Management")}
+        </div>
+      </div>
+      <div class="pulse">
+        ${pulseHtml}
+      </div>
+      <div class="main" id="main"></div>
+      <div class="overlay" id="overlay"></div>
+      <div class="drawer" id="drawer"></div>
+      <div class="toast" id="toast"></div>
+    `;
+    document.getElementById("overlay").onclick = closeDrawer;
+    document.querySelectorAll(".tab").forEach(b => b.onclick = () => { state.tab = b.dataset.tab; render(); });
+
+    const main = document.getElementById("main");
+    if(state.tab==="dashboard"){ main.innerHTML = renderDashboard(stats); initDashboardCharts(); }
+    if(state.tab==="opportunities") main.innerHTML = renderOpportunities();
+    if(state.tab==="accounts") main.innerHTML = renderAccounts();
+    if(state.tab==="tasks") main.innerHTML = renderTasks();
+    wireRowActions();
+  }
+  function tabBtn(key,label){
+    return `<button class="tab ${state.tab===key?'active':''}" data-tab="${key}">${label}</button>`;
+  }
+
+  function renderDashboard(stats){
+    const upcoming = [];
+    state.opportunities.forEach(o=>{
+      if(o.stage==="Closed Won"||o.stage==="Closed Lost") return;
+      const d = daysUntil(o.deadline);
+      if(d!==null && d<=14) upcoming.push({label:`${o.name||"(untitled)"} — RFP deadline`, d});
+    });
+    state.tasks.forEach(t=>{
+      if(t.status==="Done") return;
+      const d = daysUntil(t.dueDate);
+      if(d!==null && d<=14) upcoming.push({label:`${t.task||"(untitled)"} — task due`, d});
+    });
+    state.accounts.forEach(a=>{
+      const d = daysUntil(a.renewalDate);
+      if(d!==null && d<=14) upcoming.push({label:`${a.name||"(untitled)"} — renewal`, d});
+    });
+    upcoming.sort((a,b)=>a.d-b.d);
+
+    return `
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="panel-title">Pipeline by Stage</div>
+          <div class="chart-wrap"><canvas id="stageChart"></canvas></div>
+          <div class="chart-hint">Click a bar to see those opportunities</div>
+        </div>
+        <div class="chart-card">
+          <div class="panel-title">Accounts by Health</div>
+          <div class="chart-wrap"><canvas id="healthChart"></canvas></div>
+          <div class="chart-hint">Click a segment to see those accounts</div>
+        </div>
+        <div class="chart-card">
+          <div class="panel-title">Weighted Pipeline by Entity</div>
+          <div class="chart-wrap"><canvas id="entityChart"></canvas></div>
+          <div class="chart-hint">Click a segment to see those opportunities</div>
+        </div>
+      </div>
+      ${renderDrillPanel()}
+      <div class="panel">
+        <div class="panel-title" style="margin-bottom:10px;">Upcoming in Next 14 Days</div>
+        ${upcoming.length ? upcoming.map(u=>`<div class="mini-row"><span>${escapeHtml(u.label)}</span>${deadlineBadge(u.d)}</div>`).join("")
+          : `<div class="empty-state">Nothing due in the next 14 days.</div>`}
+      </div>
+    `;
+  }
+
+  function drillWrapper(title, bodyHtml){
+    return `
+      <div class="panel drill-panel">
+        <div class="drill-head">
+          <div class="panel-title">${escapeHtml(title)}</div>
+          <button class="btn btn-ghost btn-sm" id="drillClear">Clear filter ✕</button>
+        </div>
+        <div style="overflow-x:auto;">${bodyHtml}</div>
+      </div>
+    `;
+  }
+
+  function renderDrillPanel(){
+    if(!state.drill) return "";
+    const { type, value } = state.drill;
+
+    if(type === "stage"){
+      const items = state.opportunities.filter(o => o.stage === value);
+      const rowsHtml = items.length ? items.map(o=>{
+        const weighted = (Number(o.dealValue)||0) * (Number(o.probability)||0);
+        const d = daysUntil(o.deadline);
+        return `<tr>
+          <td><strong>${escapeHtml(o.oppId||"—")}</strong></td>
+          <td>${escapeHtml(o.account)}</td>
+          <td>${escapeHtml(o.name)}</td>
+          <td class="num">${fmtMoney(weighted)}</td>
+          <td>${deadlineBadge(d)}</td>
+          <td class="row-actions"><button class="btn btn-ghost btn-sm" data-edit="opportunities" data-id="${o.id}">Edit</button></td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="6" class="empty-state">No opportunities in this stage.</td></tr>`;
+      return drillWrapper(`Opportunities — Stage: ${value}`, `
+        <table><thead><tr><th>Opp ID</th><th>Account</th><th>Opportunity</th><th>Weighted $</th><th>Deadline</th><th>Actions</th></tr></thead>
+        <tbody>${rowsHtml}</tbody></table>
+      `);
+    }
+
+    if(type === "health"){
+      const items = state.accounts.filter(a => a.health === value);
+      const rowsHtml = items.length ? items.map(a=>{
+        const d = daysUntil(a.renewalDate);
+        return `<tr>
+          <td><strong>${escapeHtml(a.accId||"—")}</strong></td>
+          <td>${escapeHtml(a.name)}</td>
+          <td class="num">${fmtMoney(a.arr)}</td>
+          <td>${deadlineBadge(d)}</td>
+          <td class="row-actions"><button class="btn btn-ghost btn-sm" data-edit="accounts" data-id="${a.id}">Edit</button></td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="5" class="empty-state">No accounts with this health status.</td></tr>`;
+      return drillWrapper(`Accounts — Health: ${value}`, `
+        <table><thead><tr><th>Account ID</th><th>Account</th><th>ARR</th><th>Renewal</th><th>Actions</th></tr></thead>
+        <tbody>${rowsHtml}</tbody></table>
+      `);
+    }
+
+    if(type === "entity"){
+      const items = state.opportunities.filter(o=>{
+        if(o.stage==="Closed Won"||o.stage==="Closed Lost") return false;
+        return (o.drivenBy||"Unspecified") === value;
+      });
+      const rowsHtml = items.length ? items.map(o=>{
+        const weighted = (Number(o.dealValue)||0) * (Number(o.probability)||0);
+        return `<tr>
+          <td><strong>${escapeHtml(o.oppId||"—")}</strong></td>
+          <td>${escapeHtml(o.account)}</td>
+          <td>${escapeHtml(o.name)}</td>
+          <td>${ragBadge(o.stage)}</td>
+          <td class="num">${fmtMoney(weighted)}</td>
+          <td class="row-actions"><button class="btn btn-ghost btn-sm" data-edit="opportunities" data-id="${o.id}">Edit</button></td>
+        </tr>`;
+      }).join("") : `<tr><td colspan="6" class="empty-state">No open opportunities for this entity.</td></tr>`;
+      return drillWrapper(`Open Pipeline — Driven By: ${value}`, `
+        <table><thead><tr><th>Opp ID</th><th>Account</th><th>Opportunity</th><th>Stage</th><th>Weighted $</th><th>Actions</th></tr></thead>
+        <tbody>${rowsHtml}</tbody></table>
+      `);
+    }
+    return "";
+  }
+
+  function initDashboardCharts(){
+    if(typeof Chart === "undefined") return;
+
+    const STAGE_COLORS = {
+      "Qualification":"#9CA3AF", "Discovery":"#2563EB", "Solution Design":"#7C3AED",
+      "Proposal/RFP Submitted":"#B15C00", "Proposal Presentation":"#0E7490",
+      "Negotiation":"#DB7B24", "Closed Won":"#2E7D32", "Closed Lost":"#C62828"
+    };
+    const stageLabels = OPP_OPTS.stage;
+    const stageCounts = {};
+    stageLabels.forEach(s => stageCounts[s] = 0);
+    state.opportunities.forEach(o => { if(stageCounts[o.stage] !== undefined) stageCounts[o.stage]++; });
+    const stageCtx = document.getElementById("stageChart");
+    if(stageCtx){
+      state.charts.stage = new Chart(stageCtx, {
+        type: "bar",
+        data: { labels: stageLabels, datasets: [{
+          data: stageLabels.map(s => stageCounts[s]),
+          backgroundColor: stageLabels.map(s => STAGE_COLORS[s] || "#9CA3AF"),
+          borderRadius: 6, maxBarThickness: 24,
+        }]},
+        options: {
+          indexAxis: "y", responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false },
+            tooltip: { callbacks: { label: ctx => `${ctx.parsed.x} opportunit${ctx.parsed.x===1?"y":"ies"}` } } },
+          scales: { x: { beginAtZero: true, ticks: { precision: 0 } }, y: { grid: { display: false } } },
+          onClick: (evt, elements) => {
+            if(!elements.length) return;
+            state.drill = { type: "stage", value: stageLabels[elements[0].index] };
+            render();
+          },
+        },
+      });
+    }
+
+    const healthLabels = ["Green","Yellow","Red"];
+    const HEALTH_COLORS = { Green:"#2E7D32", Yellow:"#B15C00", Red:"#C62828" };
+    const healthCounts = { Green:0, Yellow:0, Red:0 };
+    state.accounts.forEach(a => { if(healthCounts[a.health] !== undefined) healthCounts[a.health]++; });
+    const healthCtx = document.getElementById("healthChart");
+    if(healthCtx){
+      state.charts.health = new Chart(healthCtx, {
+        type: "doughnut",
+        data: { labels: healthLabels, datasets: [{
+          data: healthLabels.map(h => healthCounts[h]),
+          backgroundColor: healthLabels.map(h => HEALTH_COLORS[h]),
+          borderWidth: 2, borderColor: "#fff",
+        }]},
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: "62%",
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } },
+          onClick: (evt, elements) => {
+            if(!elements.length) return;
+            state.drill = { type: "health", value: healthLabels[elements[0].index] };
+            render();
+          },
+        },
+      });
+    }
+
+    const entityTotals = {};
+    state.opportunities.forEach(o=>{
+      if(o.stage==="Closed Won"||o.stage==="Closed Lost") return;
+      const key = o.drivenBy || "Unspecified";
+      entityTotals[key] = (entityTotals[key]||0) + (Number(o.dealValue)||0) * (Number(o.probability)||0);
+    });
+    const entityLabels = Object.keys(entityTotals).sort((a,b) => entityTotals[b]-entityTotals[a]);
+    const ENTITY_PALETTE = ["#1E2761","#2563EB","#7C3AED","#B15C00","#2E7D32","#C62828","#0E7490","#BE185D"];
+    const entityCtx = document.getElementById("entityChart");
+    if(entityCtx && entityLabels.length){
+      state.charts.entity = new Chart(entityCtx, {
+        type: "doughnut",
+        data: { labels: entityLabels, datasets: [{
+          data: entityLabels.map(k => entityTotals[k]),
+          backgroundColor: entityLabels.map((_, i) => ENTITY_PALETTE[i % ENTITY_PALETTE.length]),
+          borderWidth: 2, borderColor: "#fff",
+        }]},
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: "55%",
+          plugins: {
+            legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 10.5 } } },
+            tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmtMoney(ctx.parsed)}` } },
+          },
+          onClick: (evt, elements) => {
+            if(!elements.length) return;
+            state.drill = { type: "entity", value: entityLabels[elements[0].index] };
+            render();
+          },
+        },
+      });
+    }
+  }
+
+  function renderOpportunities(){
+    const rows = state.opportunities.map(o=>{
+      const weighted = (Number(o.dealValue)||0) * (Number(o.probability)||0);
+      const d = daysUntil(o.deadline);
+      const isActive = o.stage !== "Closed Won" && o.stage !== "Closed Lost";
+      return `<tr class="${isActive ? 'row-active' : ''}">
+        <td><strong>${escapeHtml(o.oppId||"—")}</strong></td>
+        <td>${escapeHtml(o.account)}</td>
+        <td>${escapeHtml(o.name)}</td>
+        <td><span class="badge badge-gray">${escapeHtml(o.drivenBy||"—")}</span></td>
+        <td>${escapeHtml(o.bidType)}</td>
+        <td>${escapeHtml(o.opportunityType)}</td>
+        <td>${ragBadge(o.stage)}</td>
+        <td>${ragBadge(o.priority)}</td>
+        <td class="num">${fmtMoney(o.dealValue)}</td>
+        <td class="num">${Math.round((Number(o.probability)||0)*100)}%</td>
+        <td class="num">${fmtMoney(weighted)}</td>
+        <td>${deadlineBadge(d)}</td>
+        <td>${escapeHtml(o.owner)}</td>
+        <td class="row-actions">
+          <button class="btn btn-ghost btn-sm" data-edit="opportunities" data-id="${o.id}">Edit</button>
+          <button class="btn btn-danger-ghost btn-sm" data-del="opportunities" data-id="${o.id}">Delete</button>
+        </td>
+      </tr>`;
+    }).join("");
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Opportunity Management</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost" data-savemodule="opportunities">💾 Save</button>
+            <button class="btn btn-primary" data-add="opportunities">+ Add Opportunity</button>
+          </div>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px; margin-bottom:10px; font-size:11.5px; color:var(--muted);">
+          <span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:#EEF4FF; border:1px solid #C9DCFC;"></span>
+          Active (open) opportunity
+        </div>
+        <div style="overflow-x:auto;">
+        <table><thead><tr>
+          <th>Opp ID</th><th>Account</th><th>Opportunity</th><th>Driven By</th><th>Bid Type</th><th>Opp Type</th><th>Stage</th><th>Priority</th>
+          <th>Deal Value</th><th>Prob.</th><th>Weighted $</th><th>Deadline</th><th>Owner</th><th>Actions</th>
+        </tr></thead>
+        <tbody>${rows || `<tr><td colspan="14" class="empty-state">No opportunities yet — add your first one.</td></tr>`}</tbody>
+        </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderAccounts(){
+    const rows = state.accounts.map(a=>{
+      const d = daysUntil(a.renewalDate);
+      return `<tr>
+        <td><strong>${escapeHtml(a.accId||"—")}</strong></td>
+        <td>${escapeHtml(a.name)}</td>
+        <td>${escapeHtml(a.owner)}</td>
+        <td>${escapeHtml(a.tier)}</td>
+        <td class="num">${fmtMoney(a.arr)}</td>
+        <td>${deadlineBadge(d)}</td>
+        <td>${ragBadge(a.health)}</td>
+        <td class="num">${fmtMoney(a.upsellPotential)}</td>
+        <td class="row-actions">
+          <button class="btn btn-ghost btn-sm" data-edit="accounts" data-id="${a.id}">Edit</button>
+          <button class="btn btn-danger-ghost btn-sm" data-del="accounts" data-id="${a.id}">Delete</button>
+        </td>
+      </tr>`;
+    }).join("");
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Account Management</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost" data-savemodule="accounts">💾 Save</button>
+            <button class="btn btn-primary" data-add="accounts">+ Add Account</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+        <table><thead><tr>
+          <th>Account ID</th><th>Account</th><th>Owner</th><th>Tier</th><th>ARR</th><th>Renewal</th><th>Health</th><th>Upsell Potential</th><th>Actions</th>
+        </tr></thead>
+        <tbody>${rows || `<tr><td colspan="9" class="empty-state">No accounts yet — add your first one.</td></tr>`}</tbody>
+        </table>
+        </div>
+      </div>
+    `;
+  }
+
+  function sortTasksForBoard(list){
+    const prRank = { High: 0, Medium: 1, Low: 2 };
+    return [...list].sort((a,b)=>{
+      const pa = prRank[a.priority] ?? 3, pb = prRank[b.priority] ?? 3;
+      if(pa !== pb) return pa - pb;
+      const da = daysUntil(a.dueDate), db = daysUntil(b.dueDate);
+      const va = da === null ? Infinity : da, vb = db === null ? Infinity : db;
+      return va - vb;
+    });
+  }
+
+  function renderTasks(){
+    const columns = TASK_OPTS.status.map(status=>{
+      const items = sortTasksForBoard(state.tasks.filter(t => t.status === status));
+      const colors = COLUMN_COLORS[status] || { bar:"#9CA3AF", bg:"#F3F4F6" };
+      const cards = items.map(t=>{
+        const d = daysUntil(t.dueDate);
+        const priColor = PRIORITY_COLORS[t.priority] || "#9CA3AF";
+        return `
+          <div class="kanban-card" style="border-left-color:${priColor};">
+            <div class="kc-top">${ragBadge(t.priority)}${deadlineBadge(d)}</div>
+            <div class="kc-title">${escapeHtml(t.task || "(untitled)")}</div>
+            <div class="kc-meta">${escapeHtml(t.category || "—")}</div>
+            ${t.status==="Bottlenecks" && t.bottleneckType ? `<div class="kc-meta"><strong>Bottleneck:</strong> ${escapeHtml(t.bottleneckType)}</div>` : ""}
+            <div class="kc-meta">${escapeHtml(relatedLabel(t))}</div>
+            <div class="kc-meta">Owner: ${escapeHtml(t.owner || "—")}</div>
+            <div class="row-actions" style="margin-top:8px;">
+              <button class="btn btn-ghost btn-sm" data-edit="tasks" data-id="${t.id}">Edit</button>
+              <button class="btn btn-danger-ghost btn-sm" data-del="tasks" data-id="${t.id}">Delete</button>
+            </div>
+          </div>`;
+      }).join("");
+      return `
+        <div class="kanban-col">
+          <div class="kanban-col-head" style="border-top-color:${colors.bar}; background:${colors.bg};">
+            <span>${status}</span><span class="kcount">${items.length}</span>
+          </div>
+          <div class="kanban-col-body">
+            ${cards || `<div class="empty-state" style="padding:16px 6px;">No tasks</div>`}
+          </div>
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title">Task Management</div>
+          <div style="display:flex; gap:8px;">
+            <button class="btn btn-ghost" data-savemodule="tasks">💾 Save</button>
+            <button class="btn btn-primary" data-add="tasks">+ Add Task</button>
+          </div>
+        </div>
+        <div class="kanban-board">${columns}</div>
+      </div>
+    `;
+  }
+
+  // ---------- Row action wiring ----------
+  function wireRowActions(){
+    document.querySelectorAll("[data-add]").forEach(b => b.onclick = () => openDrawer(b.dataset.add, null));
+    document.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => openDrawer(b.dataset.edit, b.dataset.id));
+    document.querySelectorAll("[data-del]").forEach(b => b.onclick = async () => {
+      const key = b.dataset.del, id = b.dataset.id;
+      state[key] = state[key].filter(x => x.id !== id);
+      await persist(key);
+      showToast("Deleted.");
+      render();
+    });
+    const drillClearBtn = document.getElementById("drillClear");
+    if(drillClearBtn) drillClearBtn.onclick = () => { state.drill = null; render(); };
+    document.querySelectorAll("[data-savemodule]").forEach(b => b.onclick = async () => {
+      await persist(b.dataset.savemodule);
+      showToast("Saved.");
+    });
+  }
+
+  // ---------- Drawer / forms ----------
+  function fieldOptsHtml(name, opts, selected){
+    return `<option value="">Select…</option>` + opts.map(o=>`<option value="${o}" ${o===selected?'selected':''}>${o}</option>`).join("");
+  }
+
+  function openDrawer(entity, id){
+    const isEdit = !!id;
+    const record = isEdit ? state[entity].find(x=>x.id===id) : {};
+    let title, formHtml;
+
+    if(entity==="opportunities"){
+      title = isEdit ? "Edit Opportunity" : "Add Opportunity";
+      formHtml = `
+        <div class="field"><label>Opportunity ID</label><input value="${isEdit ? escapeHtml(record.oppId) : 'Auto-assigned on save'}" disabled style="color:var(--muted); background:#F7F8FB;"></div>
+        <div class="field">
+          <label>Account Name</label>
+          <select id="f_account">${accountOptsHtml(record.account)}</select>
+        </div>
+        <div class="field" id="f_accountNewWrap" style="display:none;">
+          <label>New Account Name</label>
+          <input id="f_accountNew" placeholder="Type the new account name">
+        </div>
+        <div class="field"><label>Opportunity Name</label><input id="f_name" value="${escapeHtml(record.name)}"></div>
+        <div class="field">
+          <label>Driven By</label>
+          <select id="f_drivenBy">${entityOptsHtml(record.drivenBy)}</select>
+        </div>
+        <div class="field" id="f_drivenByNewWrap" style="display:none;">
+          <label>New Entity / Partner Name</label>
+          <input id="f_drivenByNew" placeholder="Type the new entity or partner name">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Bid Type</label><select id="f_bidType">${fieldOptsHtml("bidType",OPP_OPTS.bidType,record.bidType)}</select></div>
+          <div class="field"><label>Opportunity Type</label><select id="f_opportunityType">${fieldOptsHtml("opportunityType",OPP_OPTS.opportunityType,record.opportunityType)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Stage</label><select id="f_stage">${fieldOptsHtml("stage",OPP_OPTS.stage,record.stage)}</select></div>
+          <div class="field"><label>Priority</label><select id="f_priority">${fieldOptsHtml("priority",OPP_OPTS.priority,record.priority)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Owner</label><input id="f_owner" value="${escapeHtml(record.owner)}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Deal Value ($)</label><input id="f_dealValue" type="number" value="${record.dealValue??''}"></div>
+          <div class="field"><label>Probability (%)</label><input id="f_probability" type="number" min="0" max="100" value="${record.probability!==undefined?Math.round(record.probability*100):''}"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Pre-Bid Kick-off Date (if any)</label><input id="f_preBidKickoffDate" type="date" value="${record.preBidKickoffDate||''}"></div>
+          <div class="field"><label>Clarification Deadline (if any)</label><input id="f_clarificationDeadline" type="date" value="${record.clarificationDeadline||''}"></div>
+        </div>
+        <div class="field"><label>RFP / Submission Deadline</label><input id="f_deadline" type="date" value="${record.deadline||''}"></div>
+        <div class="field"><label>Competitors</label><input id="f_competitors" value="${escapeHtml(record.competitors)}"></div>
+        <div class="field"><label>Next Steps</label><textarea id="f_nextSteps">${escapeHtml(record.nextSteps)}</textarea></div>
+        <div class="field"><label>Win / Loss Reason</label><input id="f_winLossReason" value="${escapeHtml(record.winLossReason)}"></div>
+      `;
+    } else if(entity==="accounts"){
+      title = isEdit ? "Edit Account" : "Add Account";
+      formHtml = `
+        <div class="field"><label>Account ID</label><input value="${isEdit ? escapeHtml(record.accId) : 'Auto-assigned on save'}" disabled style="color:var(--muted); background:#F7F8FB;"></div>
+        <div class="field"><label>Account Name</label><input id="f_name" value="${escapeHtml(record.name)}"></div>
+        <div class="field-row">
+          <div class="field"><label>Owner</label><input id="f_owner" value="${escapeHtml(record.owner)}"></div>
+          <div class="field"><label>Tier</label><select id="f_tier">${fieldOptsHtml("tier",ACC_OPTS.tier,record.tier)}</select></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>ARR ($)</label><input id="f_arr" type="number" value="${record.arr??''}"></div>
+          <div class="field"><label>Health</label><select id="f_health">${fieldOptsHtml("health",ACC_OPTS.health,record.health)}</select></div>
+        </div>
+        <div class="field"><label>Renewal Date</label><input id="f_renewalDate" type="date" value="${record.renewalDate||''}"></div>
+        <div class="field"><label>Open Upsell Potential ($)</label><input id="f_upsellPotential" type="number" value="${record.upsellPotential??''}"></div>
+        <div class="field"><label>Key Stakeholder(s)</label><input id="f_stakeholders" value="${escapeHtml(record.stakeholders)}"></div>
+        <div class="field"><label>Next Steps</label><textarea id="f_nextSteps">${escapeHtml(record.nextSteps)}</textarea></div>
+      `;
+    } else {
+      title = isEdit ? "Edit Task" : "Add Task";
+      formHtml = `
+        <div class="field"><label>Task</label><input id="f_task" value="${escapeHtml(record.task)}"></div>
+        <div class="field-row">
+          <div class="field"><label>Category</label><select id="f_category">${fieldOptsHtml("category",TASK_OPTS.category,record.category)}</select></div>
+          <div class="field"><label>Owner</label><input id="f_owner" value="${escapeHtml(record.owner)}"></div>
+        </div>
+        <div class="field"><label>Related To (Opportunity / Account)</label><select id="f_relatedTo">${relatedOptionsHtml(record.relatedType, record.relatedId)}</select></div>
+        <div class="field-row">
+          <div class="field"><label>Priority</label><select id="f_priority">${fieldOptsHtml("priority",TASK_OPTS.priority,record.priority)}</select></div>
+          <div class="field"><label>Status</label><select id="f_status">${fieldOptsHtml("status",TASK_OPTS.status,record.status)}</select></div>
+        </div>
+        <div class="field" id="f_bottleneckWrap" style="display:${record.status==='Bottlenecks' ? 'block' : 'none'};">
+          <label>Bottleneck Type</label>
+          <select id="f_bottleneckType">${fieldOptsHtml("bottleneckType",TASK_OPTS.bottleneckType,record.bottleneckType)}</select>
+        </div>
+        <div class="field"><label>Due Date</label><input id="f_dueDate" type="date" value="${record.dueDate||''}"></div>
+      `;
+    }
+
+    const drawer = document.getElementById("drawer");
+    drawer.innerHTML = `
+      <div class="drawer-head"><h3>${title}</h3><button class="drawer-close" id="drawerClose">&times;</button></div>
+      <div class="drawer-body">${formHtml}</div>
+      <div class="drawer-foot">
+        <button class="btn btn-ghost" id="drawerCancel">Cancel</button>
+        <button class="btn btn-primary" id="drawerSave">Save</button>
+      </div>
+    `;
+    document.getElementById("drawerClose").onclick = closeDrawer;
+    document.getElementById("drawerCancel").onclick = closeDrawer;
+    document.getElementById("drawerSave").onclick = () => saveRecord(entity, isEdit ? id : null);
+    if(entity==="opportunities"){
+      const drivenSel = document.getElementById("f_drivenBy");
+      const drivenWrap = document.getElementById("f_drivenByNewWrap");
+      if(drivenSel.value === "__new__") drivenWrap.style.display = "block";
+      drivenSel.onchange = () => { drivenWrap.style.display = drivenSel.value === "__new__" ? "block" : "none"; };
+
+      const accountSel = document.getElementById("f_account");
+      const accountWrap = document.getElementById("f_accountNewWrap");
+      if(accountSel.value === "__new__") accountWrap.style.display = "block";
+      accountSel.onchange = () => { accountWrap.style.display = accountSel.value === "__new__" ? "block" : "none"; };
+    }
+    if(entity==="tasks"){
+      const statusSel = document.getElementById("f_status");
+      const bwrap = document.getElementById("f_bottleneckWrap");
+      statusSel.onchange = () => { bwrap.style.display = statusSel.value === "Bottlenecks" ? "block" : "none"; };
+    }
+    document.getElementById("overlay").classList.add("open");
+    drawer.classList.add("open");
+  }
+  function closeDrawer(){
+    document.getElementById("overlay").classList.remove("open");
+    document.getElementById("drawer").classList.remove("open");
+  }
+
+  async function saveRecord(entity, id){
+    let rec;
+    let autoCreatedAccount = null;
+    if(entity==="opportunities"){
+      let drivenBy = document.getElementById("f_drivenBy").value;
+      if(drivenBy === "__new__"){
+        const newVal = document.getElementById("f_drivenByNew").value.trim();
+        if(newVal){
+          const exists = state.entityOptions.some(e => e.toLowerCase() === newVal.toLowerCase());
+          if(!exists){ state.entityOptions.push(newVal); await persist("entityOptions"); }
+          drivenBy = newVal;
+        } else {
+          drivenBy = "";
+        }
+      }
+      let account = document.getElementById("f_account").value;
+      if(account === "__new__"){
+        account = document.getElementById("f_accountNew").value.trim();
+      }
+      rec = {
+        account,
+        name: document.getElementById("f_name").value.trim(),
+        drivenBy,
+        bidType: document.getElementById("f_bidType").value,
+        opportunityType: document.getElementById("f_opportunityType").value,
+        stage: document.getElementById("f_stage").value,
+        priority: document.getElementById("f_priority").value,
+        owner: document.getElementById("f_owner").value.trim(),
+        dealValue: parseFloat(document.getElementById("f_dealValue").value)||0,
+        probability: (parseFloat(document.getElementById("f_probability").value)||0)/100,
+        preBidKickoffDate: document.getElementById("f_preBidKickoffDate").value,
+        clarificationDeadline: document.getElementById("f_clarificationDeadline").value,
+        deadline: document.getElementById("f_deadline").value,
+        competitors: document.getElementById("f_competitors").value.trim(),
+        nextSteps: document.getElementById("f_nextSteps").value.trim(),
+        winLossReason: document.getElementById("f_winLossReason").value.trim(),
+      };
+      autoCreatedAccount = await ensureAccountExists(rec.account);
+    } else if(entity==="accounts"){
+      rec = {
+        name: document.getElementById("f_name").value.trim(),
+        owner: document.getElementById("f_owner").value.trim(),
+        tier: document.getElementById("f_tier").value,
+        arr: parseFloat(document.getElementById("f_arr").value)||0,
+        health: document.getElementById("f_health").value,
+        renewalDate: document.getElementById("f_renewalDate").value,
+        upsellPotential: parseFloat(document.getElementById("f_upsellPotential").value)||0,
+        stakeholders: document.getElementById("f_stakeholders").value.trim(),
+        nextSteps: document.getElementById("f_nextSteps").value.trim(),
+      };
+    } else {
+      const relVal = document.getElementById("f_relatedTo").value;
+      let relatedType = "", relatedId = "";
+      if(relVal){ const parts = relVal.split(":"); relatedType = parts[0]; relatedId = parts[1]; }
+      const statusVal = document.getElementById("f_status").value;
+      const bottleneckType = statusVal === "Bottlenecks" ? document.getElementById("f_bottleneckType").value : "";
+      rec = {
+        task: document.getElementById("f_task").value.trim(),
+        category: document.getElementById("f_category").value,
+        owner: document.getElementById("f_owner").value.trim(),
+        relatedType, relatedId,
+        priority: document.getElementById("f_priority").value,
+        status: statusVal,
+        bottleneckType,
+        dueDate: document.getElementById("f_dueDate").value,
+      };
+    }
+
+    let autoTasksCreated = 0;
+    if(id){
+      const idx = state[entity].findIndex(x=>x.id===id);
+      state[entity][idx] = { ...state[entity][idx], ...rec };
+    } else {
+      rec.id = uid();
+      if(entity==="opportunities") rec.oppId = genOppId();
+      if(entity==="accounts") rec.accId = genAccId();
+      state[entity].push(rec);
+      if(entity==="opportunities"){
+        const autoTasks = buildAutoTasksForOpportunity(rec);
+        if(autoTasks.length){
+          state.tasks.push(...autoTasks);
+          await persist("tasks");
+          autoTasksCreated = autoTasks.length;
+        }
+      }
+      if(entity==="accounts"){
+        const autoTasks = buildAutoTasksForAccount(rec);
+        if(autoTasks.length){
+          state.tasks.push(...autoTasks);
+          await persist("tasks");
+          autoTasksCreated = autoTasks.length;
+        }
+      }
+    }
+    await persist(entity);
+    closeDrawer();
+    const msgParts = ["Saved."];
+    if(autoCreatedAccount) msgParts.push(`Account "${autoCreatedAccount.accId}" auto-created.`);
+    if(autoTasksCreated) msgParts.push(`${autoTasksCreated} task${autoTasksCreated===1?"":"s"} added to Task Management.`);
+    showToast(msgParts.join(" "));
+    render();
+  }
+
+  loadAll();
+})();
+</script>

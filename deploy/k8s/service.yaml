@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: presales-command-center-service
+  namespace: presales
+spec:
+  selector:
+    app: command-center-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
+  type: ClusterIP

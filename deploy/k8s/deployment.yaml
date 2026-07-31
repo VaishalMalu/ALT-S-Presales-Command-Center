@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: presales-command-center-web
+  namespace: presales
+  labels:
+    app: command-center-web
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: command-center-web
+  template:
+    metadata:
+      labels:
+        app: command-center-web
+    spec:
+      containers:
+      - name: web
+        image: your-registry.azurecr.io/command-center-web:latest
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: command-center-secrets
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5

@@ -1,0 +1,202 @@
+openapi: 3.0.0
+info:
+  title: AI-Powered Enterprise Pre-Sales Command Center - API
+  version: 1.0.0
+  description: API for managing Opportunities, Accounts, Bids, and Tasks.
+servers:
+  - url: /api
+paths:
+  /opportunities:
+    get:
+      summary: Get all opportunities
+      responses:
+        '200':
+          description: A list of opportunities
+    post:
+      summary: Create a new opportunity
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Opportunity'
+      responses:
+        '201':
+          description: Created opportunity
+  /opportunities/{id}:
+    get:
+      summary: Get an opportunity by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Opportunity details
+    put:
+      summary: Update an opportunity
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Opportunity'
+      responses:
+        '200':
+          description: Updated opportunity
+    delete:
+      summary: Delete an opportunity
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Opportunity deleted
+  /opportunities/{id}/transition:
+    post:
+      summary: Transition an opportunity to a new stage (State Machine)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fromStage
+                - toStage
+                - userId
+              properties:
+                fromStage:
+                  type: string
+                toStage:
+                  type: string
+                reason:
+                  type: string
+                userId:
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Transition successful, returns updated opportunity and logs audit trail.
+  /accounts:
+    get:
+      summary: Get all accounts
+      responses:
+        '200':
+          description: A list of accounts
+    post:
+      summary: Create a new account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Account'
+      responses:
+        '201':
+          description: Created account
+  /bids:
+    get:
+      summary: Get all bids
+      responses:
+        '200':
+          description: A list of bids
+    post:
+      summary: Create a new bid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Bid'
+      responses:
+        '201':
+          description: Created bid
+  /tasks:
+    get:
+      summary: Get all tasks
+      responses:
+        '200':
+          description: A list of tasks
+    post:
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Task'
+      responses:
+        '201':
+          description: Created task
+components:
+  schemas:
+    Opportunity:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        stage:
+          type: string
+        deal_value:
+          type: number
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        health_score:
+          type: number
+    Bid:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        opportunity_id:
+          type: string
+          format: uuid
+        submission_deadline:
+          type: string
+          format: date-time
+        status:
+          type: string
+    Task:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string

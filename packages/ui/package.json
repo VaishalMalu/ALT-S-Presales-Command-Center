@@ -9,7 +9,7 @@
   ],
   "exports": {
     "./styles.css": "./dist/index.css",
-    "./*": "./dist/*.js"
+    "./*": "./src/*.tsx"
   },
   "license": "MIT",
   "scripts": {
@@ -17,7 +17,7 @@
     "build:components": "tsc",
     "check-types": "tsc --noEmit",
     "dev:styles": "tailwindcss -i ./src/styles.css -o ./dist/index.css --watch",
-    "dev:components": "tsc --watch",
+    "dev:components": "echo \"Build not needed\"",
     "lint": "eslint src --max-warnings 0"
   },
   "peerDependencies": {
@@ -31,6 +31,6 @@
     "@types/react": "^19.1.0",
     "eslint": "^9.39.1",
     "tailwindcss": "^4.1.5",
-    "typescript": "5.9.2"
+    "typescript": "^5.7.3"
   }
 }
