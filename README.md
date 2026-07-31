@@ -46,7 +46,7 @@ graph TD
     classDef api fill:#1e1b4b,stroke:#a78bfa,stroke-width:2px,color:#fff
     classDef db fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff
     
-    subgraph Client Tier
+    subgraph ClientTier [Client Tier]
         UI[React 18 SPA]:::client
         State[React Context / State]:::client
         Visuals[Chart.js & Tailwind]:::client
@@ -54,13 +54,13 @@ graph TD
         State --> Visuals
     end
 
-    subgraph Security Layer
+    subgraph SecurityLayer [Security Layer]
         Guard[Auth Guard Gateway]:::auth
         JWT[Session Tokens]:::auth
         Guard --> JWT
     end
 
-    subgraph Data Access Layer (API)
+    subgraph DataAccess [Data Access Layer]
         REST[Mock API Controllers]:::api
         BLL[Business Logic Layer]:::api
         Export[CSV Export Engine]:::api
@@ -68,7 +68,7 @@ graph TD
         BLL --> Export
     end
 
-    subgraph Persistence Layer
+    subgraph PersistenceLayer [Persistence Layer]
         DB[(PostgreSQL Database)]:::db
         Schema[Relational Schema]:::db
         DB --- Schema
