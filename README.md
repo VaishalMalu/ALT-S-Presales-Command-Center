@@ -82,6 +82,43 @@ graph TD
 
 ---
 
+## Core Application Flow
+
+The system is designed to provide a unified dashboard for enterprise pre-sales professionals. It connects a React (Vite) frontend to a live Supabase backend.
+
+```mermaid
+graph TD
+    User([Sales Professional]) --> Login[Login Screen]
+    
+    subgraph "Authentication Layer"
+        Login -->|Credentials| SupabaseAuth{Supabase Auth}
+        SupabaseAuth -->|Success| ProtectedRoute[Protected Routes]
+        SupabaseAuth -->|Fail| Login
+    end
+    
+    ProtectedRoute --> AppLayout[App Layout / Navigation]
+    
+    subgraph "Core Modules"
+        AppLayout --> Dashboard[Dashboard Overview]
+        AppLayout --> Accounts[Accounts Management]
+        AppLayout --> Opportunities[Opportunities Pipeline]
+        AppLayout --> Contacts[Contact Directory]
+        AppLayout --> Bids[Bid Management]
+        AppLayout --> Tasks[Task Board]
+    end
+
+    subgraph "Backend Infrastructure (Supabase)"
+        DB[(PostgreSQL Database)]
+        DB <-->|Read / Write| Accounts
+        DB <-->|Read / Write| Opportunities
+        DB <-->|Read / Write| Contacts
+        DB <-->|Read / Write| Bids
+        DB <-->|Read / Write| Tasks
+    end
+```
+
+---
+
 ## AI Feature Integration Flow
 
 The Groq AI engine (`llama-3.3-70b-versatile`) has been woven into both the global application state and the specific data-entry points.
