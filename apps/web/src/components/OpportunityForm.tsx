@@ -6,6 +6,7 @@ import {
 } from "../../lib/api/opportunities";
 import { getAccounts } from "../../lib/api/accounts";
 import { useCurrency } from "../contexts/CurrencyContext";
+import AIFormToolbar from "./AIFormToolbar";
 
 interface OpportunityFormProps {
   initialData?: Opportunity | null;
@@ -96,6 +97,7 @@ export default function OpportunityForm({
 
   return (
     <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-4">
+      <AIFormToolbar formType="Opportunity" formData={formData} setFormData={setFormData} />
       {error && <div className="text-danger text-sm mb-4">{error}</div>}
 
       <div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Bid, Opportunity } from "@repo/db";
 import { createBid, updateBid } from "../../lib/api/bids";
 import { getOpportunities } from "../../lib/api/opportunities";
+import AIFormToolbar from "./AIFormToolbar";
 
 interface BidFormProps {
   initialData?: any;
@@ -60,6 +61,7 @@ export default function BidForm({
 
   return (
     <form id="bid-form" onSubmit={handleSubmit} className="space-y-4">
+      <AIFormToolbar formType="Bid" formData={formData} setFormData={setFormData} />
       {error && <div className="text-danger text-sm mb-4">{error}</div>}
 
       <div>

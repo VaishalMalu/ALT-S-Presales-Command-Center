@@ -4,6 +4,7 @@ import { createTask, updateTask } from "../../lib/api/tasks";
 
 import { getOpportunities } from "../../lib/api/opportunities";
 import { getAccounts } from "../../lib/api/accounts";
+import AIFormToolbar from "./AIFormToolbar";
 
 interface TaskFormProps {
   initialData?: Task | null;
@@ -73,6 +74,7 @@ export default function TaskForm({
 
   return (
     <form id="task-form" onSubmit={handleSubmit} className="space-y-4">
+      <AIFormToolbar formType="Task" formData={formData} setFormData={setFormData} />
       {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 
       <div>

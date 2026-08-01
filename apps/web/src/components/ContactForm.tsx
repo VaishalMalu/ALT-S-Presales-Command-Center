@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Contact, Account } from "@repo/db";
 import { createContact, updateContact } from "../../lib/api/contacts";
 import { getAccounts } from "../../lib/api/accounts";
+import AIFormToolbar from "./AIFormToolbar";
 
 interface ContactFormProps {
   initialData?: any;
@@ -61,6 +62,7 @@ export default function ContactForm({
 
   return (
     <form id="contact-form" onSubmit={handleSubmit} className="space-y-4">
+      <AIFormToolbar formType="Contact" formData={formData} setFormData={setFormData} />
       {error && <div className="text-danger text-sm mb-4">{error}</div>}
 
       <div className="grid grid-cols-2 gap-4">

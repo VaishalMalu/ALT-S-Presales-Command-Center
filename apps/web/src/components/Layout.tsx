@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Search, User, Menu, X, Command } from "lucide-react";
 import { supabase } from "@repo/db";
+import AIAssistantWidget from "./AIAssistantWidget";
 
 import { useCurrency, Currency } from "../contexts/CurrencyContext";
 import { getAccounts } from "../../lib/api/accounts";
@@ -313,6 +314,9 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Global AI Assistant */}
+      <AIAssistantWidget />
     </div>
   );
 }

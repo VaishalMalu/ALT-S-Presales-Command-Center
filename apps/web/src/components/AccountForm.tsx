@@ -3,6 +3,7 @@ import { Account } from "@repo/db";
 import { createAccount, updateAccount } from "../../lib/api/accounts";
 import { createTask } from "../../lib/api/tasks";
 import { useCurrency } from "../contexts/CurrencyContext";
+import AIFormToolbar from "./AIFormToolbar";
 
 interface AccountFormProps {
   initialData?: Account | null;
@@ -105,6 +106,7 @@ export default function AccountForm({
 
   return (
     <form id="account-form" onSubmit={handleSubmit} className="space-y-4">
+      <AIFormToolbar formType="Account" formData={formData} setFormData={setFormData} />
       {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 
       <div>

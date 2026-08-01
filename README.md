@@ -82,6 +82,54 @@ graph TD
 
 ---
 
+## AI Feature Integration Flow
+
+The Groq AI engine (`llama-3.3-70b-versatile`) has been woven into both the global application state and the specific data-entry points.
+
+```mermaid
+graph TD
+    User([Sales Professional])
+    
+    subgraph "Global Context"
+        User -->|Clicks floating button| GlobalAI[Global AI Assistant]
+        PageContext[Current Page URL & Context] --> GlobalAI
+        GlobalAI <-->|Chat Prompts| GroqAPI((Groq Cloud API))
+    end
+    
+    subgraph "Data Entry (Any Form)"
+        User -->|Opens Form| Form[Opportunity, Account, Task, etc.]
+        Form --> AIToolbar[AI Form Toolbar]
+        
+        AIToolbar -->|1. Paste Text| Autofill(AI Autofill)
+        AIToolbar -->|2. Click Validate| Validate(Risk Analysis)
+        AIToolbar -->|3. Click Recommend| Recommend(Next Steps)
+        
+        Autofill <-->|JSON Extraction| GroqAPI
+        Validate <-->|Risk Assessment| GroqAPI
+        Recommend <-->|Strategic Advice| GroqAPI
+        
+        Autofill -->|Populates| FormState[Form State]
+        Validate -->|Displays Alert| FormState
+        Recommend -->|Appends Text| FormState
+    end
+```
+
+### AI Capabilities Breakdown
+
+1. **Global AI Assistant (`AIAssistantWidget`)**
+   - **Trigger**: Floating action button on every page.
+   - **Context**: Ingests `window.location.pathname` to understand what the user is looking at.
+   - **Action**: Provides real-time chat assistance regarding pre-sales methodologies, bid strategies, or general navigation help.
+
+2. **AI Form Toolbar (`AIFormToolbar`)**
+   - **Trigger**: Injected at the top of every entity form (`OpportunityForm`, `AccountForm`, etc.).
+   - **Actions**:
+     - **Autofill**: Takes unstructured text (emails, call transcripts), sends a prompt requesting structured JSON mapping to the specific form's schema, and auto-populates the React state.
+     - **Risk Analysis**: Serializes the current form state to JSON and sends it to the LLM to analyze for missing deadlines, overly optimistic win probabilities, or missing critical stakeholders.
+     - **Recommendations**: Analyzes the current deal size and stage to formulate 2-3 concise, tactical next steps, auto-appending them to the form's text areas.
+
+---
+
 ## Core Capabilities
 
 > **Intelligent Dashboarding**  
