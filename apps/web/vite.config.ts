@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   return {
+    base: "/ALT-S-Presales-Command-Center/",
     plugins: [react(), tailwindcss()],
     server: {
       port: 3001,
