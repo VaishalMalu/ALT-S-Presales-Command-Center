@@ -1,12 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl =
-  process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:9999";
-const supabaseKey =
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
+// Helper to safely get env vars in both Vite (import.meta.env) and Next.js (process.env)
+const getEnvVar = (key: string): string | undefined => {
+  if (typeof process !== "undefined" && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  // @ts-ignore
+  if (typeof import.meta !== "undefined" && import.meta.env && import.meta.env[key]) {
+    // @ts-ignore
+    return import.meta.env[key];
+  }
+  return undefined;
+};
 
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  console.warn("⚠️ NEXT_PUBLIC_SUPABASE_URL is not set. Using fallback.");
+const supabaseUrl = getEnvVar("NEXT_PUBLIC_SUPABASE_URL") || getEnvVar("VITE_SUPABASE_URL") || "http://127.0.0.1:9999";
+const supabaseKey = getEnvVar("NEXT_PUBLIC_SUPABASE_ANON_KEY") || getEnvVar("VITE_SUPABASE_ANON_KEY") || "placeholder-key";
+
+if (supabaseUrl === "http://127.0.0.1:9999") {
+  console.warn("⚠️ SUPABASE_URL is not set. Using fallback localhost.");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseKey);

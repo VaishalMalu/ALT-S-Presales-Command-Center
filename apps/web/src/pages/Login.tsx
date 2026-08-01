@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@repo/db";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,21 +15,27 @@ export default function LoginPage() {
     setMounted(true);
   }, []);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Simulate network request
-    setTimeout(() => {
-      if (email === "admin@alt-s.com" && password === "admin") {
-        localStorage.setItem("auth", "true");
-        navigate("/");
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setError(error.message);
       } else {
-        setError("Invalid email or password.");
-        setLoading(false);
+        navigate("/");
       }
-    }, 800);
+    } catch (err: any) {
+      setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

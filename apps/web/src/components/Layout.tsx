@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Search, User, Menu, X, Command } from "lucide-react";
+import { supabase } from "@repo/db";
 
 import { useCurrency, Currency } from "../contexts/CurrencyContext";
 import { getAccounts } from "../../lib/api/accounts";
@@ -293,8 +294,8 @@ export default function Layout() {
                     Profile Settings
                   </button>
                   <button
-                    onClick={() => {
-                      localStorage.removeItem("auth");
+                    onClick={async () => {
+                      await supabase.auth.signOut();
                       navigate("/login");
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors"

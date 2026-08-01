@@ -1,25 +1,34 @@
-import { Bid } from "@repo/db";
-import { getMockData, setMockData, genId } from "./mock-db";
-
-const TABLE = "bids";
+import { Bid, supabase } from "@repo/db";
 
 export async function getBids(): Promise<Bid[]> {
-  const data = getMockData<Bid>(TABLE);
-  return data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  const { data, error } = await supabase
+    .from("bids")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data || [];
 }
 
 export async function createBid(bid: Partial<Bid>): Promise<Bid> {
-  const data = getMockData<Bid>(TABLE);
-  const newRecord = { ...bid, id: genId(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Bid;
-  setMockData(TABLE, [newRecord, ...data]);
-  return newRecord;
+  const { data, error } = await supabase
+    .from("bids")
+    .insert([bid])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
 export async function updateBid(id: string, updates: Partial<Bid>): Promise<Bid> {
-  const data = getMockData<Bid>(TABLE);
-  const idx = data.findIndex(x => x.id === id);
-  if (idx === -1) throw new Error("Not found");
-  data[idx] = { ...data[idx], ...updates, updated_at: new Date().toISOString() };
-  setMockData(TABLE, data);
-  return data[idx];
+  const { data, error } = await supabase
+    .from("bids")
+    .update(updates)
+    .eq("id", id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }

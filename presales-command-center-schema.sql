@@ -228,15 +228,15 @@ CREATE TABLE IF NOT EXISTS contacts (
 ALTER TABLE contacts ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
-    CREATE POLICY "Allow authenticated select on contacts" ON contacts FOR SELECT USING (auth.role() = 'authenticated');
+    CREATE POLICY "Allow public read on contacts" ON contacts FOR SELECT USING (true);
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Allow authenticated insert on contacts" ON contacts FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    CREATE POLICY "Allow public insert on contacts" ON contacts FOR INSERT WITH CHECK (true);
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 DO $$ BEGIN
-    CREATE POLICY "Allow authenticated update on contacts" ON contacts FOR UPDATE USING (auth.role() = 'authenticated');
+    CREATE POLICY "Allow public update on contacts" ON contacts FOR UPDATE USING (true);
 EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
