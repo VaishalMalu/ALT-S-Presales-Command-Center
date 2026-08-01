@@ -44,7 +44,7 @@ export default function LoginPage() {
         <div className="flex flex-col items-center mb-10">
           <div className="h-16 flex items-center justify-center mb-6">
             <img
-              src="/logo.png"
+              src={`${import.meta.env.BASE_URL}logo.png`}
               alt="ALT-S Logo"
               className="h-12 w-auto object-contain transition-transform hover:scale-105 duration-300"
               onError={(e) => {

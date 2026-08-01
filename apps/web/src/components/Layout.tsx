@@ -35,7 +35,7 @@ export default function Layout() {
     <>
       <div className="h-16 px-5 border-b border-border bg-gradient-to-b from-gray-50 to-white flex items-center gap-3 shrink-0">
         <img
-          src="/logo.png"
+          src={`${import.meta.env.BASE_URL}logo.png`}
           alt="ALT-S Logo"
           className="h-9 w-auto object-contain"
           onError={(e) => {
