@@ -1,52 +1,25 @@
-import { supabase, Task, TaskStatus } from "@repo/db";
+import { Task } from "@repo/db";
+import { getMockData, setMockData, genId } from "./mock-db";
+
+const TABLE = "tasks";
 
 export async function getTasks(): Promise<Task[]> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .select("*")
-    .order("created_at", { ascending: false });
-
-  if (error) throw error;
-  return data;
+  const data = getMockData<Task>(TABLE);
+  return data.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
 
 export async function createTask(task: Partial<Task>): Promise<Task> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .insert(task)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  const data = getMockData<Task>(TABLE);
+  const newRecord = { ...task, id: genId(), created_at: new Date().toISOString(), updated_at: new Date().toISOString() } as Task;
+  setMockData(TABLE, [newRecord, ...data]);
+  return newRecord;
 }
 
-export async function updateTaskStatus(
-  id: string,
-  status: TaskStatus,
-): Promise<Task> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .update({ status, updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
-}
-
-export async function updateTask(
-  id: string,
-  task: Partial<Task>,
-): Promise<Task> {
-  const { data, error } = await supabase
-    .from("tasks")
-    .update({ ...task, updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+export async function updateTask(id: string, updates: Partial<Task>): Promise<Task> {
+  const data = getMockData<Task>(TABLE);
+  const idx = data.findIndex(x => x.id === id);
+  if (idx === -1) throw new Error("Not found");
+  data[idx] = { ...data[idx], ...updates, updated_at: new Date().toISOString() };
+  setMockData(TABLE, data);
+  return data[idx];
 }
