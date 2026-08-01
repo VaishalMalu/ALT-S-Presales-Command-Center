@@ -4,7 +4,7 @@ export type Currency = "USD" | "AED" | "INR";
 
 export const CURRENCY_SYMBOLS: Record<Currency, string> = {
   USD: "$",
-  AED: "د.إ",
+  AED: "AED ",
   INR: "₹",
 };
 

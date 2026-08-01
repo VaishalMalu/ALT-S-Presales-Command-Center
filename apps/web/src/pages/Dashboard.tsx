@@ -93,7 +93,7 @@ export default function DashboardPage() {
       openTasks: String(openTasks),
       overdue: String(overdue),
     };
-  }, [opportunities, accounts, tasks]);
+  }, [opportunities, accounts, tasks, currencySymbol]);
 
   const upcoming = useMemo(() => {
     const list: { label: string; days: number }[] = [];

@@ -147,7 +147,7 @@ export default function Layout() {
               className="bg-gray-100 border border-gray-200 text-gray-700 text-xs font-semibold rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
             >
               <option value="USD">USD ($)</option>
-              <option value="AED">AED (د.إ)</option>
+              <option value="AED">AED</option>
               <option value="INR">INR (₹)</option>
             </select>
             <button
