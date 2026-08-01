@@ -24,4 +24,5 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
+  zoom: 80%; /* Apply 80% default zoom per user request */
 }
