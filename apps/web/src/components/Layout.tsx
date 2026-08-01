@@ -1,26 +1,36 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Search, User, Menu, X, Command } from "lucide-react";
 
 import { useCurrency, Currency, CURRENCY_SYMBOLS } from "../contexts/CurrencyContext";
+import { getAccounts } from "../../lib/api/accounts";
+import { getOpportunities } from "../../lib/api/opportunities";
+import { getTasks } from "../../lib/api/tasks";
 
 export default function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { currency, setCurrency } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // Search state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchData, setSearchData] = useState<{ type: string; title: string; path: string }[]>([]);
+
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
-        e.preventDefault();
-        searchInputRef.current?.focus();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // Load searchable data
+    Promise.all([getAccounts(), getOpportunities(), getTasks()]).then(([accs, opps, tsks]) => {
+      const data = [
+        ...accs.map((a) => ({ type: "Account", title: a.name, path: "/accounts" })),
+        ...opps.map((o) => ({ type: "Opportunity", title: o.title, path: "/opportunities" })),
+        ...tsks.map((t) => ({ type: "Task", title: t.title, path: "/tasks" })),
+      ];
+      setSearchData(data);
+    });
   }, []);
 
   const navItems = [
@@ -31,6 +41,39 @@ export default function Layout() {
     { name: "Bids", path: "/bids" },
     { name: "Tasks", path: "/tasks" },
   ];
+
+  const searchResults = searchQuery
+    ? [
+        ...navItems
+          .filter((item) => item.name.toLowerCase().includes(searchQuery.toLowerCase()))
+          .map((item) => ({ type: "Page", title: item.name, path: item.path })),
+        ...searchData.filter((item) => item.title.toLowerCase().includes(searchQuery.toLowerCase())),
+      ].slice(0, 8)
+    : [];
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  // Handle clicking outside search
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchInputRef.current && !searchInputRef.current.contains(e.target as Node)) {
+        // give time for link click to process
+        setTimeout(() => setIsSearchOpen(false), 200);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
@@ -123,20 +166,63 @@ export default function Layout() {
               <Menu className="w-6 h-6" />
             </button>
 
-            <div
-              className="flex items-center bg-gray-100 px-3 py-1.5 rounded-md text-sm text-gray-500 max-w-md w-full border border-transparent focus-within:border-primary/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10 transition-all cursor-text"
-              onClick={() => searchInputRef.current?.focus()}
-            >
-              <Search className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Global Search..."
-                className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full min-w-0"
-              />
-              <kbd className="hidden lg:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 bg-gray-200 rounded border border-gray-300 shrink-0">
-                <Command className="w-3 h-3" />K
-              </kbd>
+            <div className="relative max-w-md w-full">
+              <div
+                className="flex items-center bg-gray-100 px-3 py-1.5 rounded-md text-sm text-gray-500 w-full border border-transparent focus-within:border-primary/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10 transition-all cursor-text"
+                onClick={() => {
+                  searchInputRef.current?.focus();
+                  setIsSearchOpen(true);
+                }}
+              >
+                <Search className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Global Search..."
+                  className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full min-w-0"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setIsSearchOpen(true);
+                  }}
+                  onFocus={() => setIsSearchOpen(true)}
+                />
+                <kbd className="hidden lg:flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium text-gray-400 bg-gray-200 rounded border border-gray-300 shrink-0">
+                  <Command className="w-3 h-3" />K
+                </kbd>
+              </div>
+
+              {isSearchOpen && searchQuery && (
+                <div className="absolute top-full left-0 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-100 z-50 overflow-hidden">
+                  {searchResults.length > 0 ? (
+                    <ul className="max-h-64 overflow-y-auto">
+                      {searchResults.map((result, idx) => (
+                        <li key={idx}>
+                          <button
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center justify-between group transition-colors"
+                            onClick={() => {
+                              navigate(result.path);
+                              setSearchQuery("");
+                              setIsSearchOpen(false);
+                            }}
+                          >
+                            <span className="text-sm font-medium text-gray-800 group-hover:text-primary truncate">
+                              {result.title}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-wider font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded">
+                              {result.type}
+                            </span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <div className="px-4 py-4 text-sm text-gray-500 text-center">
+                      No results found for "{searchQuery}"
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
