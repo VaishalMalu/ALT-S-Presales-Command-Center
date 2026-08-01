@@ -1,32 +1,34 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:9999';
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key';
+const supabaseUrl =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || "http://127.0.0.1:9999";
+const supabaseKey =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "placeholder-key";
 
 if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-  console.warn('⚠️ NEXT_PUBLIC_SUPABASE_URL is not set. Using fallback.');
+  console.warn("⚠️ NEXT_PUBLIC_SUPABASE_URL is not set. Using fallback.");
 }
 
-export const supabase = createClient(supabaseUrl, supabaseKey)
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Database Types mapping to presales-command-center-schema.sql
-export type OpportunityStage = 
-  | 'Lead Created'
-  | 'Customer Qualification'
-  | 'Opportunity Creation'
-  | 'Customer Requirement Analysis'
-  | 'Bid Qualification'
-  | 'RFP/RFI/RFQ Management'
-  | 'Solution Design'
-  | 'Technical Proposal'
-  | 'Commercial Proposal'
-  | 'Internal Approval Workflow'
-  | 'Proposal Submission'
-  | 'Customer Clarification'
-  | 'Negotiation'
-  | 'Decision'
-  | 'Closed Won'
-  | 'Closed Lost';
+export type OpportunityStage =
+  | "Lead Created"
+  | "Customer Qualification"
+  | "Opportunity Creation"
+  | "Customer Requirement Analysis"
+  | "Bid Qualification"
+  | "RFP/RFI/RFQ Management"
+  | "Solution Design"
+  | "Technical Proposal"
+  | "Commercial Proposal"
+  | "Internal Approval Workflow"
+  | "Proposal Submission"
+  | "Customer Clarification"
+  | "Negotiation"
+  | "Decision"
+  | "Closed Won"
+  | "Closed Lost";
 
 export interface Opportunity {
   id: string;
@@ -105,15 +107,15 @@ export interface Bid {
   updated_at: string;
 }
 
-export type TaskStatus = 
-  | 'Not Started'
-  | 'In Progress'
-  | 'Waiting Customer'
-  | 'Waiting Internal'
-  | 'Completed'
-  | 'Blocked';
+export type TaskStatus =
+  | "Not Started"
+  | "In Progress"
+  | "Waiting Customer"
+  | "Waiting Internal"
+  | "Completed"
+  | "Blocked";
 
-export type TaskPriority = 'Low' | 'Medium' | 'High' | 'Critical';
+export type TaskPriority = "Low" | "Medium" | "High" | "Critical";
 
 export interface Task {
   id: string;

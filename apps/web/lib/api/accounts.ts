@@ -1,18 +1,20 @@
-import { supabase, Account } from '@repo/db';
+import { supabase, Account } from "@repo/db";
 
 export async function getAccounts(): Promise<Account[]> {
   const { data, error } = await supabase
-    .from('accounts')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("accounts")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return data;
 }
 
-export async function createAccount(account: Partial<Account>): Promise<Account> {
+export async function createAccount(
+  account: Partial<Account>,
+): Promise<Account> {
   const { data, error } = await supabase
-    .from('accounts')
+    .from("accounts")
     .insert(account)
     .select()
     .single();
@@ -21,11 +23,14 @@ export async function createAccount(account: Partial<Account>): Promise<Account>
   return data;
 }
 
-export async function updateAccount(id: string, updates: Partial<Account>): Promise<Account> {
+export async function updateAccount(
+  id: string,
+  updates: Partial<Account>,
+): Promise<Account> {
   const { data, error } = await supabase
-    .from('accounts')
+    .from("accounts")
     .update({ ...updates, updated_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 

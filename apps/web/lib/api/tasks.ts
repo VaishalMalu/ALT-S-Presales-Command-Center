@@ -1,10 +1,10 @@
-import { supabase, Task, TaskStatus } from '@repo/db';
+import { supabase, Task, TaskStatus } from "@repo/db";
 
 export async function getTasks(): Promise<Task[]> {
   const { data, error } = await supabase
-    .from('tasks')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .from("tasks")
+    .select("*")
+    .order("created_at", { ascending: false });
 
   if (error) throw error;
   return data;
@@ -12,7 +12,7 @@ export async function getTasks(): Promise<Task[]> {
 
 export async function createTask(task: Partial<Task>): Promise<Task> {
   const { data, error } = await supabase
-    .from('tasks')
+    .from("tasks")
     .insert(task)
     .select()
     .single();
@@ -21,11 +21,14 @@ export async function createTask(task: Partial<Task>): Promise<Task> {
   return data;
 }
 
-export async function updateTaskStatus(id: string, status: TaskStatus): Promise<Task> {
+export async function updateTaskStatus(
+  id: string,
+  status: TaskStatus,
+): Promise<Task> {
   const { data, error } = await supabase
-    .from('tasks')
+    .from("tasks")
     .update({ status, updated_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 
@@ -33,11 +36,14 @@ export async function updateTaskStatus(id: string, status: TaskStatus): Promise<
   return data;
 }
 
-export async function updateTask(id: string, task: Partial<Task>): Promise<Task> {
+export async function updateTask(
+  id: string,
+  task: Partial<Task>,
+): Promise<Task> {
   const { data, error } = await supabase
-    .from('tasks')
+    .from("tasks")
     .update({ ...task, updated_at: new Date().toISOString() })
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 

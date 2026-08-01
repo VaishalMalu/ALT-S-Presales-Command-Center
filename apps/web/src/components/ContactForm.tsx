@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Contact, Account } from '@repo/db';
-import { createContact, updateContact } from '../../lib/api/contacts';
-import { getAccounts } from '../../lib/api/accounts';
+import React, { useState, useEffect } from "react";
+import { Contact, Account } from "@repo/db";
+import { createContact, updateContact } from "../../lib/api/contacts";
+import { getAccounts } from "../../lib/api/accounts";
 
 interface ContactFormProps {
   initialData?: any;
@@ -9,13 +9,17 @@ interface ContactFormProps {
   onCancel: () => void;
 }
 
-export default function ContactForm({ initialData, onSuccess, onCancel }: ContactFormProps) {
+export default function ContactForm({
+  initialData,
+  onSuccess,
+  onCancel,
+}: ContactFormProps) {
   const [formData, setFormData] = useState<Partial<Contact>>(
     initialData || {
-      first_name: '',
-      last_name: '',
-      role: 'Decision Maker',
-    }
+      first_name: "",
+      last_name: "",
+      role: "Decision Maker",
+    },
   );
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,13 +46,15 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
       }
       onSuccess();
     } catch (err: any) {
-      setError(err.message || 'Failed to save contact');
+      setError(err.message || "Failed to save contact");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -56,26 +62,30 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
   return (
     <form id="contact-form" onSubmit={handleSubmit} className="space-y-4">
       {error && <div className="text-danger text-sm mb-4">{error}</div>}
-      
+
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">First Name</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            First Name
+          </label>
           <input
             required
             type="text"
             name="first_name"
-            value={formData.first_name || ''}
+            value={formData.first_name || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">Last Name</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            Last Name
+          </label>
           <input
             required
             type="text"
             name="last_name"
-            value={formData.last_name || ''}
+            value={formData.last_name || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
@@ -83,38 +93,46 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-muted mb-1">Linked Account</label>
+        <label className="block text-xs font-semibold text-muted mb-1">
+          Linked Account
+        </label>
         <select
           required
           name="account_id"
-          value={formData.account_id || ''}
+          value={formData.account_id || ""}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
         >
           <option value="">Select Account...</option>
-          {accounts.map(acc => (
-            <option key={acc.id} value={acc.id}>{acc.name}</option>
+          {accounts.map((acc) => (
+            <option key={acc.id} value={acc.id}>
+              {acc.name}
+            </option>
           ))}
         </select>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">Email</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            Email
+          </label>
           <input
             type="email"
             name="email"
-            value={formData.email || ''}
+            value={formData.email || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">Phone</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            Phone
+          </label>
           <input
             type="tel"
             name="phone"
-            value={formData.phone || ''}
+            value={formData.phone || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
@@ -123,23 +141,27 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">Designation</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            Designation
+          </label>
           <input
             type="text"
             name="designation"
             placeholder="e.g. VP of Engineering"
-            value={formData.designation || ''}
+            value={formData.designation || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-muted mb-1">Department</label>
+          <label className="block text-xs font-semibold text-muted mb-1">
+            Department
+          </label>
           <input
             type="text"
             name="department"
             placeholder="e.g. IT, Procurement"
-            value={formData.department || ''}
+            value={formData.department || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm"
           />
@@ -147,10 +169,12 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-muted mb-1">Role Type</label>
+        <label className="block text-xs font-semibold text-muted mb-1">
+          Role Type
+        </label>
         <select
           name="role"
-          value={formData.role || 'Decision Maker'}
+          value={formData.role || "Decision Maker"}
           onChange={handleChange}
           className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
         >
@@ -176,7 +200,7 @@ export default function ContactForm({ initialData, onSuccess, onCancel }: Contac
           disabled={loading}
           className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-opacity-90 disabled:opacity-50"
         >
-          {loading ? 'Saving...' : 'Save Contact'}
+          {loading ? "Saving..." : "Save Contact"}
         </button>
       </div>
     </form>

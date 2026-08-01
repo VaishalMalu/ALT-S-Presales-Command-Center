@@ -4,7 +4,6 @@
  */
 
 export class MSGraphConnector {
-  
   /**
    * Subscribes to an inbox to listen for new emails related to Opportunities.
    */

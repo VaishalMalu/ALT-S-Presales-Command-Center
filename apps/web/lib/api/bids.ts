@@ -1,10 +1,10 @@
-import { supabase, Bid } from '@repo/db';
+import { supabase, Bid } from "@repo/db";
 
 export async function getBids(): Promise<any[]> {
   const { data, error } = await supabase
-    .from('bids')
-    .select('*, opportunities(title)')
-    .order('submission_deadline', { ascending: true });
+    .from("bids")
+    .select("*, opportunities(title)")
+    .order("submission_deadline", { ascending: true });
 
   if (error) throw error;
   return data;
@@ -12,7 +12,7 @@ export async function getBids(): Promise<any[]> {
 
 export async function createBid(bid: Partial<Bid>): Promise<Bid> {
   const { data, error } = await supabase
-    .from('bids')
+    .from("bids")
     .insert(bid)
     .select()
     .single();
@@ -21,11 +21,14 @@ export async function createBid(bid: Partial<Bid>): Promise<Bid> {
   return data;
 }
 
-export async function updateBid(id: string, updates: Partial<Bid>): Promise<Bid> {
+export async function updateBid(
+  id: string,
+  updates: Partial<Bid>,
+): Promise<Bid> {
   const { data, error } = await supabase
-    .from('bids')
+    .from("bids")
     .update(updates)
-    .eq('id', id)
+    .eq("id", id)
     .select()
     .single();
 

@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Bell, Search, User, Menu, X, Command } from 'lucide-react';
+import React, { useState, useEffect, useRef } from "react";
+import { Outlet, Link, useLocation } from "react-router-dom";
+import { Bell, Search, User, Menu, X, Command } from "lucide-react";
 
 export default function Layout() {
   const location = useLocation();
@@ -11,22 +11,22 @@ export default function Layout() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
         e.preventDefault();
         searchInputRef.current?.focus();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   const navItems = [
-    { name: 'Dashboard', path: '/' },
-    { name: 'Opportunities', path: '/opportunities' },
-    { name: 'Accounts', path: '/accounts' },
-    { name: 'Contacts', path: '/contacts' },
-    { name: 'Bids', path: '/bids' },
-    { name: 'Tasks', path: '/tasks' },
+    { name: "Dashboard", path: "/" },
+    { name: "Opportunities", path: "/opportunities" },
+    { name: "Accounts", path: "/accounts" },
+    { name: "Contacts", path: "/contacts" },
+    { name: "Bids", path: "/bids" },
+    { name: "Tasks", path: "/tasks" },
   ];
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
@@ -34,14 +34,14 @@ export default function Layout() {
   const SidebarContent = () => (
     <>
       <div className="h-16 px-5 border-b border-border bg-gradient-to-b from-gray-50 to-white flex items-center gap-3 shrink-0">
-        <img 
-          src="/logo.png" 
-          alt="ALT-S Logo" 
+        <img
+          src="/logo.png"
+          alt="ALT-S Logo"
           className="h-9 w-auto object-contain"
           onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            e.currentTarget.nextElementSibling?.classList.remove('hidden');
-            e.currentTarget.nextElementSibling?.classList.add('flex');
+            e.currentTarget.style.display = "none";
+            e.currentTarget.nextElementSibling?.classList.remove("hidden");
+            e.currentTarget.nextElementSibling?.classList.add("flex");
           }}
         />
         <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-[#2a3682] text-white hidden items-center justify-center font-bold shadow-sm">
@@ -58,13 +58,15 @@ export default function Layout() {
       </div>
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
         {navItems.map((item) => {
-          const isActive = location.pathname === item.path || (item.path !== '/' && location.pathname.startsWith(item.path));
+          const isActive =
+            location.pathname === item.path ||
+            (item.path !== "/" && location.pathname.startsWith(item.path));
           return (
             <Link
               key={item.path}
               to={item.path}
               onClick={closeMobileMenu}
-              className={`block px-3 py-2 rounded-md font-medium transition-colors ${isActive ? 'bg-primary text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}
+              className={`block px-3 py-2 rounded-md font-medium transition-colors ${isActive ? "bg-primary text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
             >
               {item.name}
             </Link>
@@ -76,7 +78,6 @@ export default function Layout() {
 
   return (
     <div className="bg-background text-primary flex h-screen overflow-hidden">
-      
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
         <SidebarContent />
@@ -86,11 +87,11 @@ export default function Layout() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-40 flex md:hidden">
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50 transition-opacity" 
+          <div
+            className="fixed inset-0 bg-black/50 transition-opacity"
             onClick={closeMobileMenu}
           ></div>
-          
+
           {/* Sidebar */}
           <aside className="relative flex-1 flex flex-col max-w-xs w-full bg-card shadow-2xl z-50 animate-in slide-in-from-left-full duration-300">
             <div className="absolute top-0 right-0 -mr-12 pt-4">
@@ -112,21 +113,21 @@ export default function Layout() {
         {/* Top Command Bar */}
         <header className="h-14 bg-card border-b border-border flex items-center justify-between px-4 sm:px-6 sticky top-0 z-10 gap-4 shrink-0">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <button 
+            <button
               className="md:hidden text-gray-500 hover:text-primary transition-colors p-1"
               onClick={() => setMobileMenuOpen(true)}
             >
               <Menu className="w-6 h-6" />
             </button>
 
-            <div 
+            <div
               className="flex items-center bg-gray-100 px-3 py-1.5 rounded-md text-sm text-gray-500 max-w-md w-full border border-transparent focus-within:border-primary/30 focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/10 transition-all cursor-text"
               onClick={() => searchInputRef.current?.focus()}
             >
               <Search className="w-4 h-4 mr-2 text-gray-400 shrink-0" />
-              <input 
+              <input
                 ref={searchInputRef}
-                type="text" 
+                type="text"
                 placeholder="Global Search..."
                 className="flex-1 bg-transparent border-none outline-none text-gray-700 placeholder-gray-400 w-full min-w-0"
               />
@@ -135,10 +136,13 @@ export default function Layout() {
               </kbd>
             </div>
           </div>
-          
+
           <div className="flex space-x-3 items-center shrink-0 relative">
-            <button 
-              onClick={() => { setNotificationsOpen(!notificationsOpen); setProfileOpen(false); }}
+            <button
+              onClick={() => {
+                setNotificationsOpen(!notificationsOpen);
+                setProfileOpen(false);
+              }}
               className="p-1.5 text-gray-500 hover:text-primary hover:bg-gray-100 rounded-full transition-colors relative hidden sm:block"
             >
               <Bell className="w-5 h-5" />
@@ -147,9 +151,14 @@ export default function Layout() {
 
             {notificationsOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setNotificationsOpen(false)}></div>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setNotificationsOpen(false)}
+                ></div>
                 <div className="absolute top-10 right-10 w-72 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-2">
-                  <div className="px-4 py-2 border-b border-gray-100 font-semibold text-gray-800 text-sm">Notifications</div>
+                  <div className="px-4 py-2 border-b border-gray-100 font-semibold text-gray-800 text-sm">
+                    Notifications
+                  </div>
                   <div className="px-4 py-8 text-center text-gray-500 text-sm">
                     No new notifications
                   </div>
@@ -157,8 +166,11 @@ export default function Layout() {
               </>
             )}
 
-            <div 
-              onClick={() => { setProfileOpen(!profileOpen); setNotificationsOpen(false); }}
+            <div
+              onClick={() => {
+                setProfileOpen(!profileOpen);
+                setNotificationsOpen(false);
+              }}
               className="w-8 h-8 bg-gray-100 border border-gray-200 rounded-full flex items-center justify-center text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors"
             >
               <User className="w-4 h-4" />
@@ -166,19 +178,26 @@ export default function Layout() {
 
             {profileOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setProfileOpen(false)}></div>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setProfileOpen(false)}
+                ></div>
                 <div className="absolute top-10 right-0 w-48 bg-white rounded-lg shadow-xl border border-gray-100 z-50 py-1">
                   <div className="px-4 py-3 border-b border-gray-100">
-                    <p className="text-sm font-semibold text-gray-800">Admin User</p>
-                    <p className="text-xs text-gray-500 truncate">admin@alt-s.com</p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      Admin User
+                    </p>
+                    <p className="text-xs text-gray-500 truncate">
+                      admin@alt-s.com
+                    </p>
                   </div>
                   <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                     Profile Settings
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
-                      localStorage.removeItem('auth');
-                      window.location.href = '/login';
+                      localStorage.removeItem("auth");
+                      window.location.href = "/login";
                     }}
                     className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 transition-colors"
                   >
@@ -189,7 +208,7 @@ export default function Layout() {
             )}
           </div>
         </header>
-        
+
         {/* Main Content scrollable area */}
         <main className="flex-1 overflow-auto p-4 sm:p-6 bg-gray-50/30">
           <Outlet />

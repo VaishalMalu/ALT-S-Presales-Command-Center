@@ -2,7 +2,7 @@
 // Deployed via `supabase functions deploy workflow-automation`
 // Scheduled via pg_cron extension in Supabase
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 // import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 console.log("Workflow Automation Edge Function initialized.");
@@ -33,16 +33,16 @@ serve(async (req) => {
     */
 
     return new Response(
-      JSON.stringify({ 
-        message: 'Workflow automation completed', 
-        escalationsCreated: 0 
+      JSON.stringify({
+        message: "Workflow automation completed",
+        escalationsCreated: 0,
       }),
-      { headers: { 'Content-Type': 'application/json' } }
+      { headers: { "Content-Type": "application/json" } },
     );
   } catch (err: any) {
-    return new Response(
-      JSON.stringify({ error: err.message }),
-      { headers: { 'Content-Type': 'application/json' }, status: 500 }
-    );
+    return new Response(JSON.stringify({ error: err.message }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
   }
-})
+});
