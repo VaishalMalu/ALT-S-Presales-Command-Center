@@ -28,9 +28,9 @@ body {
 
 #root {
   position: relative;
-  width: 125vw;
-  height: 125vh;
-  transform: scale(0.8);
+  width: 111.12vw;
+  height: 111.12vh;
+  transform: scale(0.9);
   transform-origin: top left;
   overflow: hidden;
 }
