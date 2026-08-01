@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { CurrencyProvider } from "./contexts/CurrencyContext";
 import Layout from "./components/Layout";
 import DashboardPage from "./pages/Dashboard";
 import OpportunitiesPage from "./pages/Opportunities";
@@ -21,23 +22,25 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Layout />
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<DashboardPage />} />
-        <Route path="opportunities" element={<OpportunitiesPage />} />
-        <Route path="accounts" element={<AccountsPage />} />
-        <Route path="contacts" element={<ContactsPage />} />
-        <Route path="bids" element={<BidsPage />} />
-        <Route path="tasks" element={<TasksPage />} />
-      </Route>
-    </Routes>
+    <CurrencyProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<DashboardPage />} />
+          <Route path="opportunities" element={<OpportunitiesPage />} />
+          <Route path="accounts" element={<AccountsPage />} />
+          <Route path="contacts" element={<ContactsPage />} />
+          <Route path="bids" element={<BidsPage />} />
+          <Route path="tasks" element={<TasksPage />} />
+        </Route>
+      </Routes>
+    </CurrencyProvider>
   );
 }

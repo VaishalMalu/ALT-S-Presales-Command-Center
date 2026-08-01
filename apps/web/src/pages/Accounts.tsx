@@ -3,14 +3,11 @@ import { getAccounts } from "../../lib/api/accounts";
 import { Account } from "@repo/db";
 import Drawer from "../components/Drawer";
 import AccountForm from "../components/AccountForm";
-import {
-  fmtMoney,
-  DeadlineBadge,
-  RagBadge,
-  daysUntil,
-} from "../components/ui-utils";
+import { DeadlineBadge, RagBadge, daysUntil } from "../components/ui-utils";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 export default function AccountsPage() {
+  const { formatMoney } = useCurrency();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -132,7 +129,7 @@ export default function AccountsPage() {
                       </td>
                       <td className="px-4 py-3">{acc.tier || "-"}</td>
                       <td className="px-4 py-3 font-mono">
-                        {fmtMoney(acc.arr)}
+                        {formatMoney(acc.arr)}
                       </td>
                       <td className="px-4 py-3">
                         <DeadlineBadge days={daysUntil(acc.renewal_date)} />
@@ -141,7 +138,7 @@ export default function AccountsPage() {
                         <RagBadge status={healthStr} />
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {fmtMoney(acc.upsell_potential)}
+                        {formatMoney(acc.upsell_potential)}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">

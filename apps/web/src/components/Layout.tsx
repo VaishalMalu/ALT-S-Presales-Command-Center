@@ -2,8 +2,11 @@ import React, { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation } from "react-router-dom";
 import { Bell, Search, User, Menu, X, Command } from "lucide-react";
 
+import { useCurrency, Currency, CURRENCY_SYMBOLS } from "../contexts/CurrencyContext";
+
 export default function Layout() {
   const location = useLocation();
+  const { currency, setCurrency } = useCurrency();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -138,6 +141,15 @@ export default function Layout() {
           </div>
 
           <div className="flex space-x-3 items-center shrink-0 relative">
+            <select
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as Currency)}
+              className="bg-gray-100 border border-gray-200 text-gray-700 text-xs font-semibold rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            >
+              <option value="USD">USD ($)</option>
+              <option value="AED">AED (د.إ)</option>
+              <option value="INR">INR (₹)</option>
+            </select>
             <button
               onClick={() => {
                 setNotificationsOpen(!notificationsOpen);

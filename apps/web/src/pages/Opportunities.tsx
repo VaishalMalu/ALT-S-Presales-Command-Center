@@ -4,14 +4,15 @@ import { Opportunity } from "@repo/db";
 import Drawer from "../components/Drawer";
 import OpportunityForm from "../components/OpportunityForm";
 import {
-  fmtMoney,
   DeadlineBadge,
   RagBadge,
   daysUntil,
   exportToCSV,
 } from "../components/ui-utils";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 export default function OpportunitiesPage() {
+  const { formatMoney } = useCurrency();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -153,7 +154,7 @@ export default function OpportunitiesPage() {
                     Prob.
                   </th>
                   <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">
-                    Weighted $
+                    Weighted
                   </th>
                   <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">
                     Deadline
@@ -198,13 +199,13 @@ export default function OpportunitiesPage() {
                         <RagBadge status={opp.priority} />
                       </td>
                       <td className="px-4 py-3 font-mono">
-                        {fmtMoney(opp.deal_value)}
+                        {formatMoney(opp.deal_value)}
                       </td>
                       <td className="px-4 py-3 font-mono">
                         {Math.round((Number(opp.probability) || 0) * 100)}%
                       </td>
                       <td className="px-4 py-3 font-mono font-medium">
-                        {fmtMoney(weighted)}
+                        {formatMoney(weighted)}
                       </td>
                       <td className="px-4 py-3">
                         <DeadlineBadge days={daysUntil(opp.deadline)} />

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Account } from "@repo/db";
 import { createAccount, updateAccount } from "../../lib/api/accounts";
+import { createTask } from "../../lib/api/tasks";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 interface AccountFormProps {
   initialData?: Account | null;
@@ -13,6 +15,7 @@ export default function AccountForm({
   onSuccess,
   onCancel,
 }: AccountFormProps) {
+  const { currencySymbol } = useCurrency();
   const [formData, setFormData] = useState<Partial<Account>>(
     initialData || {
       name: "",
@@ -160,7 +163,7 @@ export default function AccountForm({
         </div>
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
-            ARR ($)
+            ARR ({currencySymbol})
           </label>
           <input
             type="number"
@@ -206,7 +209,7 @@ export default function AccountForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
-            Upsell Potential ($)
+            Upsell Potential ({currencySymbol})
           </label>
           <input
             type="number"

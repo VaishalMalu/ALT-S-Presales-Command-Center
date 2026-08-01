@@ -5,6 +5,7 @@ import {
   updateOpportunity,
 } from "../../lib/api/opportunities";
 import { getAccounts } from "../../lib/api/accounts";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 interface OpportunityFormProps {
   initialData?: Opportunity | null;
@@ -17,6 +18,7 @@ export default function OpportunityForm({
   onSuccess,
   onCancel,
 }: OpportunityFormProps) {
+  const { currencySymbol } = useCurrency();
   const [formData, setFormData] = useState<Partial<Opportunity>>(
     initialData || {
       title: "",
@@ -270,7 +272,7 @@ export default function OpportunityForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">
-            Deal Value ($)
+            Deal Value ({currencySymbol})
           </label>
           <input
             type="number"

@@ -14,6 +14,7 @@ import {
   ArcElement,
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
+import { useCurrency } from "../contexts/CurrencyContext";
 
 ChartJS.register(
   CategoryScale,
@@ -26,6 +27,7 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
+  const { currencySymbol } = useCurrency();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -86,8 +88,8 @@ export default function DashboardPage() {
     });
 
     return {
-      weightedPipeline: `$${(weightedPipeline / 1000000).toFixed(1)}M`,
-      totalArr: `$${(totalArr / 1000000).toFixed(1)}M`,
+      weightedPipeline: `${currencySymbol}${(weightedPipeline / 1000000).toFixed(1)}M`,
+      totalArr: `${currencySymbol}${(totalArr / 1000000).toFixed(1)}M`,
       openTasks: String(openTasks),
       overdue: String(overdue),
     };
