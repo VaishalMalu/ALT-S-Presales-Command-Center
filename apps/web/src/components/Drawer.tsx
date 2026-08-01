@@ -20,10 +20,10 @@ export default function Drawer({
   return (
     <>
       <div
-        className="fixed inset-0 bg-[#141B4D] bg-opacity-35 z-40 transition-opacity"
+        className="fixed inset-0 bg-[#141B4D]/40 z-40 transition-opacity"
         onClick={onClose}
       />
-      <div className="fixed top-0 right-0 w-full sm:w-[440px] max-w-full h-[100vh] bg-white shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out transform">
+      <div className="fixed top-0 right-0 w-full sm:w-[440px] max-w-full h-full bg-white shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-in-out transform">
         <div className="px-[22px] py-[20px] border-b border-gray-200 flex justify-between items-center bg-white">
           <h3 className="m-0 text-[17px] font-bold text-gray-900">{title}</h3>
           <button

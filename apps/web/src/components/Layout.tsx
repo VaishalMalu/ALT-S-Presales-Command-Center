@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
 import { Bell, Search, User, Menu, X, Command } from "lucide-react";
 
-import { useCurrency, Currency, CURRENCY_SYMBOLS } from "../contexts/CurrencyContext";
+import { useCurrency, Currency } from "../contexts/CurrencyContext";
 import { getAccounts } from "../../lib/api/accounts";
 import { getOpportunities } from "../../lib/api/opportunities";
 import { getTasks } from "../../lib/api/tasks";
@@ -77,7 +77,7 @@ export default function Layout() {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <>
       <div className="h-16 px-5 border-b border-border bg-gradient-to-b from-gray-50 to-white flex items-center gap-3 shrink-0">
         <img
@@ -126,7 +126,7 @@ export default function Layout() {
     <div className="bg-background text-primary flex absolute inset-0 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -149,7 +149,7 @@ export default function Layout() {
                 <X className="text-white w-6 h-6" />
               </button>
             </div>
-            <SidebarContent />
+            {sidebarContent}
           </aside>
         </div>
       )}
@@ -197,7 +197,7 @@ export default function Layout() {
                   {searchResults.length > 0 ? (
                     <ul className="max-h-64 overflow-y-auto">
                       {searchResults.map((result, idx) => (
-                        <li key={idx}>
+                        <li key={`${result.type}-${result.title}-${idx}`}>
                           <button
                             className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center justify-between group transition-colors"
                             onClick={() => {

@@ -73,7 +73,7 @@ export default function TasksPage() {
   ];
 
   return (
-    <div className="space-y-6 h-[calc(100vh-8rem)] flex flex-col">
+    <div className="space-y-6 h-full min-h-[600px] flex flex-col">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-primary tracking-tight">
