@@ -24,5 +24,13 @@ body {
       rgb(var(--background-end-rgb))
     )
     rgb(var(--background-start-rgb));
-  zoom: 80%; /* Apply 80% default zoom per user request */
+}
+
+#root {
+  position: relative;
+  width: 125vw;
+  height: 125vh;
+  transform: scale(0.8);
+  transform-origin: top left;
+  overflow: hidden;
 }

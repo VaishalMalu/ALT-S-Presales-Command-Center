@@ -123,7 +123,7 @@ export default function Layout() {
   );
 
   return (
-    <div className="bg-background text-primary flex h-screen overflow-hidden">
+    <div className="bg-background text-primary flex absolute inset-0 overflow-hidden">
       {/* Desktop Sidebar */}
       <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
         <SidebarContent />
