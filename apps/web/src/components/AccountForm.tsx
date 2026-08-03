@@ -33,11 +33,20 @@ export default function AccountForm({
     setLoading(true);
     setError(null);
 
+    const submitData = { ...formData };
+    if (!submitData.renewal_date) submitData.renewal_date = null;
+    if (!submitData.country) submitData.country = null;
+    if (!submitData.primary_contact) submitData.primary_contact = null;
+    if (!submitData.designation) submitData.designation = null;
+    if (!submitData.phone_number) submitData.phone_number = null;
+    if (!submitData.industry) submitData.industry = null;
+    if (!submitData.region) submitData.region = null;
+
     try {
       if (initialData?.id) {
-        await updateAccount(initialData.id, formData);
+        await updateAccount(initialData.id, submitData);
       } else {
-        const newAcc = await createAccount(formData);
+        const newAcc = await createAccount(submitData);
 
         // Auto-task generation flow (matches HTML implementation)
         const label = newAcc.name || "(untitled account)";
@@ -127,22 +136,60 @@ export default function AccountForm({
           <label className="block text-xs font-semibold text-gray-500 mb-1">
             Industry
           </label>
-          <input
+          <select
             name="industry"
             value={formData.industry || ""}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
-          />
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
+          >
+            <option value="">Select Industry</option>
+            <option value="Technology">Technology</option>
+            <option value="Healthcare">Healthcare</option>
+            <option value="Finance">Finance</option>
+            <option value="Retail">Retail</option>
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Engineering & Construction">Engineering & Construction</option>
+            <option value="Energy">Energy</option>
+            <option value="Telecommunications">Telecommunications</option>
+            <option value="Government">Government</option>
+            <option value="Education">Education</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
             Region
           </label>
-          <input
+          <select
             name="region"
             value={formData.region || ""}
             onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
+          >
+            <option value="">Select Region</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Asia Pacific">Asia Pacific</option>
+            <option value="Latin America">Latin America</option>
+            <option value="Middle East & Africa">Middle East & Africa</option>
+            <option value="India">India</option>
+            <option value="UAE">UAE</option>
+            <option value="Global">Global</option>
+          </select>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 mb-1">
+            Country
+          </label>
+          <input
+            name="country"
+            value={formData.country || ""}
+            onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+            placeholder="e.g. United States, India"
           />
         </div>
       </div>
@@ -219,6 +266,50 @@ export default function AccountForm({
             value={formData.upsell_potential || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+          />
+        </div>
+      </div>
+
+      <div className="border-t border-gray-100 pt-4">
+        <h4 className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+          Primary Contact Details
+        </h4>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Contact Name (Primary)
+            </label>
+            <input
+              name="primary_contact"
+              value={formData.primary_contact || ""}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+              placeholder="Full Name"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">
+              Designation
+            </label>
+            <input
+              name="designation"
+              value={formData.designation || ""}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+              placeholder="e.g. CIO, VP of IT"
+            />
+          </div>
+        </div>
+        <div className="mt-3">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">
+            Phone Number
+          </label>
+          <input
+            name="phone_number"
+            value={formData.phone_number || ""}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+            placeholder="e.g. +1-555-0199"
           />
         </div>
       </div>

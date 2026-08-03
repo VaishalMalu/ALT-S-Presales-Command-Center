@@ -70,35 +70,51 @@ export function RagBadge({ status }: { status?: string | null }) {
   );
 }
 
-export function DeadlineBadge({ days }: { days: number | null }) {
-  if (days === null)
+export function DeadlineBadge({ dateStr }: { dateStr?: string | null }) {
+  if (!dateStr) {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
         —
       </span>
     );
-  if (days < 0)
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
-        {Math.abs(days)}d overdue
-      </span>
-    );
-  if (days <= 7)
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 border border-red-200">
-        {days}d
-      </span>
-    );
-  if (days <= 14)
-    return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-        {days}d
-      </span>
-    );
+  }
+
+  const date = new Date(dateStr);
+  const formattedDate = date.toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  const days = daysUntil(dateStr);
+  if (days === null) {
+    return <span className="text-gray-700 text-xs font-semibold">{formattedDate}</span>;
+  }
+
+  let badgeColor = "bg-green-50 text-green-700 border border-green-200";
+  let label = `${days}d left`;
+
+  if (days < 0) {
+    badgeColor = "bg-red-50 text-red-700 border border-red-200";
+    label = `${Math.abs(days)}d overdue`;
+  } else if (days <= 7) {
+    badgeColor = "bg-red-50 text-red-700 border border-red-200";
+    label = `${days}d left`;
+  } else if (days <= 14) {
+    badgeColor = "bg-amber-50 text-amber-700 border border-amber-200";
+    label = `${days}d left`;
+  } else {
+    badgeColor = "bg-gray-50 text-gray-600 border border-gray-200";
+    label = `${days}d`;
+  }
+
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-      {days}d
-    </span>
+    <div className="flex items-center gap-2">
+      <span className="text-gray-700 text-xs font-semibold">{formattedDate}</span>
+      <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeColor}`}>
+        {label}
+      </span>
+    </div>
   );
 }
 

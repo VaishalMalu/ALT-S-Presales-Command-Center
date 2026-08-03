@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getTasks } from "../../lib/api/tasks";
+import { getTasks, updateTask } from "../../lib/api/tasks";
 import { Task } from "@repo/db";
 import Drawer from "../components/Drawer";
 import TaskForm from "../components/TaskForm";
@@ -13,6 +13,66 @@ export default function TasksPage() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
+
+  // Drag and drop states
+  const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
+  const [dragOverColumnId, setDragOverColumnId] = useState<string | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+    setDraggingTaskId(taskId);
+    e.dataTransfer.setData("text/plain", taskId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnd = () => {
+    setDraggingTaskId(null);
+    setDragOverColumnId(null);
+  };
+
+  const handleDragOver = (e: React.DragEvent, columnId: string) => {
+    e.preventDefault();
+    if (dragOverColumnId !== columnId) {
+      setDragOverColumnId(columnId);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetColumnId: string) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("text/plain") || draggingTaskId;
+    if (!taskId) return;
+
+    setDraggingTaskId(null);
+    setDragOverColumnId(null);
+
+    let newStatus = "";
+    if (targetColumnId === "Not Started") {
+      newStatus = "Not Started";
+    } else if (targetColumnId === "In Progress") {
+      newStatus = "In Progress";
+    } else if (targetColumnId === "Done") {
+      newStatus = "Completed";
+    } else if (targetColumnId === "Bottlenecks") {
+      newStatus = "Blocked";
+    }
+
+    if (!newStatus) return;
+
+    // Optimistic UI update
+    const oldTasks = [...tasks];
+    setTasks((prev) =>
+      prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+    );
+
+    try {
+      await updateTask(taskId, { status: newStatus });
+      // Re-fetch to ensure perfect sync
+      const updatedData = await getTasks();
+      setTasks(updatedData);
+    } catch (err: any) {
+      setTasks(oldTasks);
+      console.error("Failed to update task status via drag-and-drop:", err);
+    }
+  };
 
   const fetchTasks = useCallback(async () => {
     setLoading(true);
@@ -108,10 +168,15 @@ export default function TasksPage() {
             const colTasks = tasks.filter((t) =>
               col.matchStatuses.includes(t.status),
             );
+            const isOver = dragOverColumnId === col.id;
             return (
               <div
                 key={col.id}
-                className="flex-none w-[320px] bg-gray-50/50 rounded-xl flex flex-col max-h-full border border-gray-100"
+                onDragOver={(e) => handleDragOver(e, col.id)}
+                onDrop={(e) => handleDrop(e, col.id)}
+                className={`flex-none w-[320px] bg-gray-50/50 rounded-xl flex flex-col max-h-full border transition-all duration-200 ${
+                  isOver ? 'border-primary border-dashed bg-primary/5 shadow-md scale-[1.01]' : 'border-gray-100'
+                }`}
               >
                 <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100/80">
                   <div className="flex items-center gap-2">
@@ -132,43 +197,51 @@ export default function TasksPage() {
                       No tasks
                     </div>
                   ) : (
-                    colTasks.map((task) => (
-                      <div
-                        key={task.id}
-                        onClick={() => handleOpenDrawer(task)}
-                        className="bg-white border border-gray-200 rounded-lg p-3.5 text-sm cursor-pointer hover:shadow-sm hover:border-blue-300 transition-all group"
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <RagBadge status={task.priority} />
-                          <DeadlineBadge days={daysUntil(task.due_date)} />
-                        </div>
-                        <div className="font-semibold text-gray-900 mt-1 mb-1.5 leading-snug group-hover:text-blue-700 transition-colors">
-                          {task.title}
-                        </div>
-                        <div className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
-                          <Tag size={12} className="opacity-70" />
-                          {task.category || "—"}
-                        </div>
-                        {col.id === "Bottlenecks" && task.bottleneck_type && (
-                          <div className="text-[11px] text-orange-700 font-medium mb-3 bg-orange-50 border border-orange-100 inline-flex items-center gap-1 px-2 py-1 rounded-md">
-                            <AlertCircle size={12} />
-                            Blocker: {task.bottleneck_type}
+                    colTasks.map((task) => {
+                      const isDragging = draggingTaskId === task.id;
+                      return (
+                        <div
+                          key={task.id}
+                          draggable
+                          onDragStart={(e) => handleDragStart(e, task.id)}
+                          onDragEnd={handleDragEnd}
+                          onClick={() => handleOpenDrawer(task)}
+                          className={`bg-white border rounded-lg p-3.5 text-sm cursor-grab active:cursor-grabbing hover:shadow-sm transition-all group ${
+                            isDragging ? 'opacity-40 border-gray-100 shadow-none' : 'border-gray-200 hover:border-blue-300'
+                          }`}
+                        >
+                          <div className="flex justify-between items-start mb-2">
+                            <RagBadge status={task.priority} />
+                            <DeadlineBadge dateStr={task.due_date} />
                           </div>
-                        )}
-                        <div className="flex flex-wrap gap-2">
-                          {task.opportunity_id && (
-                            <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 px-1.5 py-0.5 rounded flex items-center gap-1">
-                              Opp: {task.opportunity_id.substring(0, 6)}...
-                            </span>
+                          <div className="font-semibold text-gray-900 mt-1 mb-1.5 leading-snug group-hover:text-blue-700 transition-colors">
+                            {task.title}
+                          </div>
+                          <div className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">
+                            <Tag size={12} className="opacity-70" />
+                            {task.category || "—"}
+                          </div>
+                          {col.id === "Bottlenecks" && task.bottleneck_type && (
+                            <div className="text-[11px] text-orange-700 font-medium mb-3 bg-orange-50 border border-orange-100 inline-flex items-center gap-1 px-2 py-1 rounded-md">
+                              <AlertCircle size={12} />
+                              Blocker: {task.bottleneck_type}
+                            </div>
                           )}
-                          {task.account_id && (
-                            <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-100 px-1.5 py-0.5 rounded flex items-center gap-1">
-                              Acc: {task.account_id.substring(0, 6)}...
-                            </span>
-                          )}
+                          <div className="flex flex-wrap gap-2">
+                            {task.opportunity_id && (
+                              <span className="text-[10px] bg-blue-50 text-blue-700 border border-blue-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                Opp: {task.opportunity_id.substring(0, 6)}...
+                              </span>
+                            )}
+                            {task.account_id && (
+                              <span className="text-[10px] bg-purple-50 text-purple-700 border border-purple-100 px-1.5 py-0.5 rounded flex items-center gap-1">
+                                Acc: {task.account_id.substring(0, 6)}...
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               </div>

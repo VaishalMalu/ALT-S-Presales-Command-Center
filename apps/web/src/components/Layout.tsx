@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from "react";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
-import { Bell, Search, User, Menu, X, Command } from "lucide-react";
+import {
+  Bell,
+  Search,
+  User,
+  Menu,
+  X,
+  Command,
+  LayoutDashboard,
+  Target,
+  Building2,
+  Users,
+  FileText,
+  CheckSquare,
+} from "lucide-react";
 import { supabase } from "@repo/db";
 import AIAssistantWidget from "./AIAssistantWidget";
 
@@ -17,6 +30,18 @@ export default function Layout() {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Sidebar collapsed state (persisted in localStorage)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("sidebar_collapsed") === "true";
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("sidebar_collapsed", String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,12 +61,13 @@ export default function Layout() {
   }, []);
 
   const navItems = [
-    { name: "Dashboard", path: "/" },
-    { name: "Opportunities", path: "/opportunities" },
-    { name: "Accounts", path: "/accounts" },
-    { name: "Contacts", path: "/contacts" },
-    { name: "Bids", path: "/bids" },
-    { name: "Tasks", path: "/tasks" },
+    { name: "Dashboard", path: "/", short: "D" },
+    { name: "Opportunities", path: "/opportunities", short: "O" },
+    { name: "Accounts", path: "/accounts", short: "A" },
+    { name: "Contacts", path: "/contacts", short: "C" },
+    { name: "Bids", path: "/bids", short: "B" },
+    { name: "Tasks", path: "/tasks", short: "T" },
+    { name: "Audit Logs", path: "/audit-logs", short: "L" },
   ];
 
   const searchResults = searchQuery
@@ -79,42 +105,77 @@ export default function Layout() {
 
   const closeMobileMenu = () => setMobileMenuOpen(false);
 
-  const sidebarContent = (
+  const sidebarContent = (collapsed: boolean) => (
     <>
-      <div className="h-16 px-5 border-b border-border bg-gradient-to-b from-gray-50 to-white flex items-center gap-3 shrink-0">
-        <img
-          src={`${import.meta.env.BASE_URL}logo.png`}
-          alt="ALT-S Logo"
-          className="h-9 w-auto object-contain"
-          onError={(e) => {
-            e.currentTarget.style.display = "none";
-            e.currentTarget.nextElementSibling?.classList.remove("hidden");
-            e.currentTarget.nextElementSibling?.classList.add("flex");
-          }}
-        />
-        <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-[#2a3682] text-white hidden items-center justify-center font-bold shadow-sm">
-          A
-        </div>
-        <div className="flex flex-col justify-center">
-          <h1 className="font-extrabold text-[14px] text-primary leading-none tracking-tight drop-shadow-sm mb-1">
-            Presales
-          </h1>
-          <p className="text-[8px] font-bold text-gray-400 tracking-[0.1em] uppercase leading-none">
-            Command Center
-          </p>
-        </div>
+      <div className={`h-16 border-b border-border bg-gradient-to-b from-gray-50 to-white flex items-center justify-between shrink-0 ${collapsed ? 'px-3 justify-center' : 'px-5'}`}>
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <img
+              src={`${import.meta.env.BASE_URL}logo.png`}
+              alt="ALT-S Logo"
+              className="h-9 w-auto object-contain"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+                e.currentTarget.nextElementSibling?.classList.remove("hidden");
+                e.currentTarget.nextElementSibling?.classList.add("flex");
+              }}
+            />
+            <div className="w-8 h-8 rounded-md bg-gradient-to-br from-primary to-[#2a3682] text-white hidden items-center justify-center font-bold shadow-sm">
+              A
+            </div>
+            <div className="flex flex-col justify-center">
+              <h1 className="font-extrabold text-[14px] text-primary leading-none tracking-tight drop-shadow-sm mb-1">
+                Presales
+              </h1>
+              <p className="text-[8px] font-bold text-gray-400 tracking-[0.1em] uppercase leading-none">
+                Command Center
+              </p>
+            </div>
+          </div>
+        )}
+        <button
+          type="button"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className="p-1.5 rounded-md hover:bg-gray-100 text-gray-500 hover:text-primary transition-colors bg-transparent border-none cursor-pointer flex items-center justify-center shrink-0"
+          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          <Menu className="w-5 h-5" />
+        </button>
       </div>
-      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+      <nav className={`flex-1 space-y-2 overflow-y-auto ${collapsed ? 'p-2 flex flex-col items-center' : 'p-4'}`}>
         {navItems.map((item) => {
           const isActive =
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));
+          
+          if (collapsed) {
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={closeMobileMenu}
+                title={item.name}
+                className={`flex items-center justify-center w-9 h-9 rounded-md font-extrabold text-sm transition-all border ${
+                  isActive
+                    ? "bg-primary text-white border-primary shadow-sm"
+                    : "bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-primary border-gray-200"
+                }`}
+              >
+                {item.short}
+              </Link>
+            );
+          }
+
           return (
             <Link
               key={item.path}
               to={item.path}
               onClick={closeMobileMenu}
-              className={`block px-3 py-2 rounded-md font-medium transition-colors ${isActive ? "bg-primary text-white shadow-sm" : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"}`}
+              className={`block px-3 py-2 rounded-md font-semibold transition-colors text-sm ${
+                isActive
+                  ? "bg-primary text-white shadow-sm"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+              }`}
             >
               {item.name}
             </Link>
@@ -127,8 +188,8 @@ export default function Layout() {
   return (
     <div className="bg-background text-primary flex absolute inset-0 overflow-hidden">
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-card border-r border-border flex-col hidden md:flex">
-        {sidebarContent}
+      <aside className={`bg-card border-r border-border flex-col hidden md:flex transition-all duration-300 ${sidebarCollapsed ? 'w-16' : 'w-64'}`}>
+        {sidebarContent(sidebarCollapsed)}
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -151,7 +212,7 @@ export default function Layout() {
                 <X className="text-white w-6 h-6" />
               </button>
             </div>
-            {sidebarContent}
+            {sidebarContent(false)}
           </aside>
         </div>
       )}

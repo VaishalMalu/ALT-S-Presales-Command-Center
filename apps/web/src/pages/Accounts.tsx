@@ -92,6 +92,9 @@ export default function AccountsPage() {
                     Tier
                   </th>
                   <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">
+                    Country
+                  </th>
+                  <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">
                     ARR
                   </th>
                   <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">
@@ -128,11 +131,12 @@ export default function AccountsPage() {
                         {acc.created_by ? "User" : "-"}
                       </td>
                       <td className="px-4 py-3">{acc.tier || "-"}</td>
+                      <td className="px-4 py-3">{acc.country || "-"}</td>
                       <td className="px-4 py-3 font-mono">
                         {formatMoney(acc.arr)}
                       </td>
                       <td className="px-4 py-3">
-                        <DeadlineBadge days={daysUntil(acc.renewal_date)} />
+                        <DeadlineBadge dateStr={acc.renewal_date} />
                       </td>
                       <td className="px-4 py-3">
                         <RagBadge status={healthStr} />

@@ -208,7 +208,7 @@ export default function OpportunitiesPage() {
                         {formatMoney(weighted)}
                       </td>
                       <td className="px-4 py-3">
-                        <DeadlineBadge days={daysUntil(opp.deadline)} />
+                        <DeadlineBadge dateStr={opp.deadline} />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2">

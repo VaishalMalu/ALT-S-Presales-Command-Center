@@ -8,6 +8,7 @@ import AccountsPage from "./pages/Accounts";
 import BidsPage from "./pages/Bids";
 import ContactsPage from "./pages/Contacts";
 import TasksPage from "./pages/Tasks";
+import AuditLogsPage from "./pages/AuditLogs";
 import LoginPage from "./pages/Login";
 import { supabase } from "@repo/db";
 import { Session } from "@supabase/supabase-js";
@@ -66,6 +67,7 @@ export default function App() {
           <Route path="contacts" element={<ContactsPage />} />
           <Route path="bids" element={<BidsPage />} />
           <Route path="tasks" element={<TasksPage />} />
+          <Route path="audit-logs" element={<AuditLogsPage />} />
         </Route>
       </Routes>
     </CurrencyProvider>

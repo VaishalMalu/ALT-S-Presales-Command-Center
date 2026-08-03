@@ -151,7 +151,7 @@ export default function DashboardPage() {
     "Lead Created",
     "Customer Qualification",
     "Solution Design",
-    "Proposal/RFP Submitted",
+    "Proposal Submission",
     "Closed Won",
     "Closed Lost",
   ];
@@ -160,7 +160,7 @@ export default function DashboardPage() {
   );
 
   const stageChartData = {
-    labels: stageLabels,
+    labels: stageLabels.map(l => l === "Proposal Submission" ? "Proposal/RFP Submitted" : l),
     datasets: [
       {
         data: stageCounts,

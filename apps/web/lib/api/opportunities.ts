@@ -1,4 +1,5 @@
 import { Opportunity, OpportunityStage, supabase } from "@repo/db";
+import { createAuditLog } from "./audit";
 
 export async function getOpportunities(): Promise<Opportunity[]> {
   const { data, error } = await supabase
@@ -29,10 +30,27 @@ export async function createOpportunity(opportunity: Partial<Opportunity>): Prom
     .single();
 
   if (error) throw error;
+
+  // Log audit
+  await createAuditLog({
+    entity_type: "Opportunity",
+    entity_id: data.id,
+    action_type: "CREATE",
+    entity_name: data.title,
+    changes: data,
+  });
+
   return data;
 }
 
 export async function updateOpportunity(id: string, updates: Partial<Opportunity>): Promise<Opportunity> {
+  // Fetch previous record to compute diff
+  const { data: original } = await supabase
+    .from("opportunities")
+    .select("*")
+    .eq("id", id)
+    .single();
+
   const { data, error } = await supabase
     .from("opportunities")
     .update(updates)
@@ -41,6 +59,30 @@ export async function updateOpportunity(id: string, updates: Partial<Opportunity
     .single();
 
   if (error) throw error;
+
+  // Compute diff
+  if (original) {
+    const diff: Record<string, { old: any; new: any }> = {};
+    let hasChanges = false;
+    for (const key of Object.keys(updates)) {
+      const typedKey = key as keyof Opportunity;
+      if (typedKey !== "updated_at" && original[typedKey] !== data[typedKey]) {
+        diff[key] = { old: original[typedKey], new: data[typedKey] };
+        hasChanges = true;
+      }
+    }
+
+    if (hasChanges) {
+      await createAuditLog({
+        entity_type: "Opportunity",
+        entity_id: data.id,
+        action_type: "UPDATE",
+        entity_name: data.title,
+        changes: diff,
+      });
+    }
+  }
+
   return data;
 }
 

@@ -137,9 +137,7 @@ export default function BidsPage() {
                         <RagBadge status={bid.approval_status} />
                       </td>
                       <td className="px-4 py-3">
-                        <DeadlineBadge
-                          days={daysUntil(bid.submission_deadline)}
-                        />
+                        <DeadlineBadge dateStr={bid.submission_deadline} />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">

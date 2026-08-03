@@ -40,26 +40,30 @@ export class AIGateway {
     options?: AIGatewayOptions,
   ): Promise<T> {
     const provider = options?.provider || this.defaultProvider;
-    console.log(`Dispatching request to ${provider}...`);
+    console.log(`Dispatching request to ${provider} (via Groq)...`);
 
-    // In production, instantiate the respective SDK here (e.g., @azure/openai)
-    // and use schema-enforced JSON generation (e.g. OpenAI structured outputs).
+    const { generateJSON } = await import("../ai/groq");
 
-    // Mock response for architectural scaffolding
-    if (schema === WinPredictionSchema) {
-      return {
-        probability: 85,
-        revenue_forecast: 1200000,
-        deal_health: "Good",
-        customer_intent: "High",
-        risk_level: "Low",
-        recommended_next_actions: ["Schedule technical deep-dive"],
-        explanation:
-          "The customer exhibits strong buying signals and the budget aligns with the proposed solution design.",
-      } as unknown as T;
+    let schemaDescription = "";
+    if (schema instanceof z.ZodObject) {
+      const shape = schema.shape;
+      const entries = Object.entries(shape).map(([key, value]: any) => {
+        let typeStr = value._def.typeName;
+        if (value instanceof z.ZodEnum) {
+          typeStr = `enum [${value._def.values.map((v: string) => `"${v}"`).join(", ")}]`;
+        } else if (value instanceof z.ZodArray) {
+          typeStr = `array of ${value._def.type._def.typeName}`;
+        }
+        return `  "${key}": ${typeStr} // ${value._def.description || ""}`;
+      });
+      schemaDescription = `{\n${entries.join(",\n")}\n}`;
+    } else {
+      schemaDescription = JSON.stringify(schema, null, 2);
     }
 
-    throw new Error("Unsupported schema for mock dispatch");
+    const prompt = `${userContent}\n\nYou MUST return a JSON object matching this schema definition:\n${schemaDescription}`;
+    
+    return await generateJSON<T>(prompt, systemPrompt);
   }
 
   public async predictWin(
