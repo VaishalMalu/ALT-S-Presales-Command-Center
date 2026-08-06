@@ -27,7 +27,7 @@ ChartJS.register(
 );
 
 export default function DashboardPage() {
-  const { currencySymbol } = useCurrency();
+  const { formatCompactMoney } = useCurrency();
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -88,12 +88,12 @@ export default function DashboardPage() {
     });
 
     return {
-      weightedPipeline: `${currencySymbol}${(weightedPipeline / 1000000).toFixed(1)}M`,
-      totalArr: `${currencySymbol}${(totalArr / 1000000).toFixed(1)}M`,
+      weightedPipeline: formatCompactMoney(weightedPipeline),
+      totalArr: formatCompactMoney(totalArr),
       openTasks: String(openTasks),
       overdue: String(overdue),
     };
-  }, [opportunities, accounts, tasks, currencySymbol]);
+  }, [opportunities, accounts, tasks, formatCompactMoney]);
 
   const upcoming = useMemo(() => {
     const list: { label: string; days: number }[] = [];

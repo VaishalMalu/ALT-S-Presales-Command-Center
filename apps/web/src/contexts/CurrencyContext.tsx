@@ -13,6 +13,7 @@ interface CurrencyContextType {
   currencySymbol: string;
   setCurrency: (c: Currency) => void;
   formatMoney: (amount?: number | null) => string;
+  formatCompactMoney: (amount?: number | null) => string;
 }
 
 const CurrencyContext = createContext<CurrencyContextType | undefined>(undefined);
@@ -37,8 +38,28 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     return `${CURRENCY_SYMBOLS[currency]}${Math.round(Number(amount)).toLocaleString()}`;
   };
 
+  const formatCompactMoney = (amount?: number | null) => {
+    if (amount === undefined || amount === null) return `${CURRENCY_SYMBOLS[currency]}0`;
+    
+    const num = Number(amount);
+    
+    if (currency === "INR") {
+      if (num >= 10000000) return `${CURRENCY_SYMBOLS[currency]}${(num / 10000000).toFixed(1)}Cr`;
+      if (num >= 100000) return `${CURRENCY_SYMBOLS[currency]}${(num / 100000).toFixed(1)}L`;
+      if (num >= 1000) return `${CURRENCY_SYMBOLS[currency]}${(num / 1000).toFixed(1)}K`;
+      return `${CURRENCY_SYMBOLS[currency]}${num.toFixed(0)}`;
+    }
+    
+    // For USD and AED (International System)
+    if (num >= 1000000000) return `${CURRENCY_SYMBOLS[currency]}${(num / 1000000000).toFixed(1)}B`;
+    if (num >= 1000000) return `${CURRENCY_SYMBOLS[currency]}${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${CURRENCY_SYMBOLS[currency]}${(num / 1000).toFixed(1)}K`;
+    
+    return `${CURRENCY_SYMBOLS[currency]}${num.toFixed(0)}`;
+  };
+
   return (
-    <CurrencyContext.Provider value={{ currency, currencySymbol: CURRENCY_SYMBOLS[currency], setCurrency, formatMoney }}>
+    <CurrencyContext.Provider value={{ currency, currencySymbol: CURRENCY_SYMBOLS[currency], setCurrency, formatMoney, formatCompactMoney }}>
       {children}
     </CurrencyContext.Provider>
   );
