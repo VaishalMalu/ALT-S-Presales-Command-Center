@@ -8,11 +8,12 @@ import {
   X,
   Command,
   LayoutDashboard,
-  Target,
+  Briefcase,
   Building2,
   Users,
-  FileText,
-  CheckSquare,
+  FileSignature,
+  ListChecks,
+  ShieldCheck,
 } from "lucide-react";
 import { supabase } from "@repo/db";
 import AIAssistantWidget from "./AIAssistantWidget";
@@ -61,13 +62,13 @@ export default function Layout() {
   }, []);
 
   const navItems = [
-    { name: "Dashboard", path: "/", short: "D" },
-    { name: "Opportunities", path: "/opportunities", short: "O" },
-    { name: "Accounts", path: "/accounts", short: "A" },
-    { name: "Contacts", path: "/contacts", short: "C" },
-    { name: "Bids", path: "/bids", short: "B" },
-    { name: "Tasks", path: "/tasks", short: "T" },
-    { name: "Audit Logs", path: "/audit-logs", short: "L" },
+    { name: "Dashboard", path: "/", icon: LayoutDashboard },
+    { name: "Opportunities", path: "/opportunities", icon: Briefcase },
+    { name: "Accounts", path: "/accounts", icon: Building2 },
+    { name: "Contacts", path: "/contacts", icon: Users },
+    { name: "Bids", path: "/bids", icon: FileSignature },
+    { name: "Tasks", path: "/tasks", icon: ListChecks },
+    { name: "Audit Logs", path: "/audit-logs", icon: ShieldCheck },
   ];
 
   const searchResults = searchQuery
@@ -148,6 +149,8 @@ export default function Layout() {
             location.pathname === item.path ||
             (item.path !== "/" && location.pathname.startsWith(item.path));
           
+          const Icon = item.icon;
+
           if (collapsed) {
             return (
               <Link
@@ -155,13 +158,13 @@ export default function Layout() {
                 to={item.path}
                 onClick={closeMobileMenu}
                 title={item.name}
-                className={`flex items-center justify-center w-9 h-9 rounded-md font-extrabold text-sm transition-all border ${
+                className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors group ${
                   isActive
-                    ? "bg-primary text-white border-primary shadow-sm"
-                    : "bg-gray-50 text-gray-500 hover:bg-gray-100 hover:text-primary border-gray-200"
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-500 hover:bg-gray-100 hover:text-gray-900"
                 }`}
               >
-                {item.short}
+                <Icon className="w-[20px] h-[20px]" strokeWidth={isActive ? 2.5 : 2} />
               </Link>
             );
           }
@@ -171,12 +174,15 @@ export default function Layout() {
               key={item.path}
               to={item.path}
               onClick={closeMobileMenu}
-              className={`block px-3 py-2 rounded-md font-semibold transition-colors text-sm ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg font-medium transition-colors text-[14px] group ${
                 isActive
-                  ? "bg-primary text-white shadow-sm"
+                  ? "bg-primary/10 text-primary"
                   : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
               }`}
             >
+              <Icon className={`w-[20px] h-[20px] transition-colors ${
+                isActive ? "text-primary" : "text-gray-400 group-hover:text-gray-600"
+              }`} strokeWidth={isActive ? 2.5 : 2} />
               {item.name}
             </Link>
           );
