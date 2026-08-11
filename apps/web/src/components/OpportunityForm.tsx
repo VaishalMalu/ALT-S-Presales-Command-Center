@@ -7,6 +7,7 @@ import {
 import { getAccounts } from "../../lib/api/accounts";
 import { useCurrency } from "../contexts/CurrencyContext";
 import AIFormToolbar from "./AIFormToolbar";
+import AccountForm from "./AccountForm";
 
 interface OpportunityFormProps {
   initialData?: Opportunity | null;
@@ -26,12 +27,14 @@ export default function OpportunityForm({
       stage: "Lead Created",
       deal_value: 0,
       probability: 0,
+      priority: "Medium",
     },
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [customEntities, setCustomEntities] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   // Bid Type dropdown constraint state
   const [hasWonOpportunity, setHasWonOpportunity] = useState(false);
@@ -160,6 +163,40 @@ export default function OpportunityForm({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  if (isCreatingAccount) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
+          <button
+            type="button"
+            onClick={() => setIsCreatingAccount(false)}
+            className="text-sm font-semibold text-primary hover:underline bg-transparent border-none cursor-pointer p-0"
+          >
+            &larr; Back to Opportunity
+          </button>
+          <span className="text-gray-400">|</span>
+          <h3 className="m-0 text-sm font-bold text-gray-900 uppercase tracking-wider">Create New Account</h3>
+        </div>
+        <AccountForm
+          onSuccess={async () => {
+            // Re-fetch accounts and auto-select the newest one
+            try {
+              const updatedAccounts = await getAccounts();
+              setAccounts(updatedAccounts);
+              if (updatedAccounts.length > 0) {
+                setFormData((prev) => ({ ...prev, account_id: updatedAccounts[0].id }));
+              }
+            } catch (err) {
+              console.error(err);
+            }
+            setIsCreatingAccount(false);
+          }}
+          onCancel={() => setIsCreatingAccount(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-4">
       <AIFormToolbar formType="Opportunity" formData={formData} setFormData={setFormData} />
@@ -183,7 +220,13 @@ export default function OpportunityForm({
         <select
           name="account_id"
           value={formData.account_id || ""}
-          onChange={handleChange}
+          onChange={(e) => {
+            if (e.target.value === "__add_new__") {
+              setIsCreatingAccount(true);
+            } else {
+              handleChange(e);
+            }
+          }}
           className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
         >
           <option value="">Select...</option>
@@ -192,6 +235,9 @@ export default function OpportunityForm({
               {acc.name}
             </option>
           ))}
+          <option value="__add_new__" className="font-semibold text-primary">
+            + Create New Account...
+          </option>
         </select>
       </div>
 
@@ -284,7 +330,9 @@ export default function OpportunityForm({
           >
             <option value="">Select...</option>
             <option value="Implementation">Implementation</option>
+            <option value="Managed Services">Managed Services</option>
             <option value="Resource Augmentation">Resource Augmentation</option>
+            <option value="CR">CR</option>
           </select>
         </div>
       </div>

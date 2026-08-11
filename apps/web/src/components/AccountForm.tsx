@@ -28,6 +28,11 @@ export default function AccountForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Opportunity creation state
+  const [createOpp, setCreateOpp] = useState(false);
+  const [oppTitle, setOppTitle] = useState("");
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -95,6 +100,17 @@ export default function AccountForm({
 
         const { createTask } = await import("../../lib/api/tasks");
         await Promise.all(tasksToCreate.map((t) => createTask(t)));
+
+        // Create initial opportunity if selected
+        if (createOpp && oppTitle.trim()) {
+          const { createOpportunity } = await import("../../lib/api/opportunities");
+          await createOpportunity({
+            account_id: newAcc.id,
+            title: oppTitle.trim(),
+            stage: "Lead Created",
+            priority: "Medium",
+          });
+        }
       }
       onSuccess();
     } catch (err: any) {
@@ -325,6 +341,35 @@ export default function AccountForm({
           className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm h-16 resize-y"
         />
       </div>
+
+      {!initialData?.id && (
+        <div className="border-t border-gray-100 pt-4 mt-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={createOpp}
+              onChange={(e) => setCreateOpp(e.target.checked)}
+              className="rounded text-blue-600 focus:ring-blue-500"
+            />
+            Create initial opportunity for this account
+          </label>
+          {createOpp && (
+            <div className="mt-3 pl-6">
+              <label className="block text-xs font-semibold text-gray-500 mb-1">
+                Opportunity Name
+              </label>
+              <input
+                type="text"
+                required={createOpp}
+                value={oppTitle}
+                onChange={(e) => setOppTitle(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+                placeholder="e.g. Phase 1 Implementation"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="flex gap-2 justify-end mt-6">
         <button

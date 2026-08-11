@@ -178,10 +178,14 @@ export default function OpportunitiesPage() {
                       className={`hover:bg-gray-50 ${isActive ? "bg-blue-50/30" : ""}`}
                     >
                       <td className="px-4 py-3 font-bold text-gray-800">
-                        OPP-{opp.id.substring(0, 4).toUpperCase()}
+                        <button onClick={() => handleOpenDrawer(opp)} className="hover:underline text-primary text-left bg-transparent border-none p-0 cursor-pointer font-bold">
+                          OPP-{opp.id.substring(0, 4).toUpperCase()}
+                        </button>
                       </td>
                       <td className="px-4 py-3 font-medium text-secondary">
-                        {opp.title}
+                        <button onClick={() => handleOpenDrawer(opp)} className="hover:underline text-primary text-left bg-transparent border-none p-0 cursor-pointer font-medium">
+                          {opp.title}
+                        </button>
                       </td>
                       <td className="px-4 py-3">
                         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-[11px]">
