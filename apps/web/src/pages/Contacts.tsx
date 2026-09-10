@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getContacts } from "../../lib/api/contacts";
+import { getContacts, deleteContact } from "../../lib/api/contacts";
 import Drawer from "../components/Drawer";
 import ContactForm from "../components/ContactForm";
 import { RagBadge } from "../components/ui-utils";
@@ -41,6 +41,17 @@ export default function ContactsPage() {
   const handleFormSuccess = () => {
     handleCloseDrawer();
     fetchContacts();
+  };
+
+  const handleDeleteContact = async (id: string, name: string) => {
+    if (window.confirm(`Are you sure you want to delete contact "${name}"?`)) {
+      try {
+        await deleteContact(id);
+        fetchContacts();
+      } catch (err: any) {
+        alert(err.message || "Failed to delete contact");
+      }
+    }
   };
 
   return (
@@ -170,6 +181,12 @@ export default function ContactsPage() {
                             onClick={() => handleOpenDrawer(contact)}
                           >
                             Edit
+                          </button>
+                          <button
+                            className="px-2.5 py-1 border border-red-200 rounded text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer transition-colors bg-white"
+                            onClick={() => handleDeleteContact(contact.id, `${contact.first_name} ${contact.last_name}`)}
+                          >
+                            Delete
                           </button>
                         </div>
                       </td>

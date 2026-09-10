@@ -32,3 +32,12 @@ export async function updateContact(id: string, updates: Partial<Contact>): Prom
   if (error) throw error;
   return data;
 }
+
+export async function deleteContact(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("contacts")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}

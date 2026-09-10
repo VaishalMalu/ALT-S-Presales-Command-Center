@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getTasks, updateTask } from "../../lib/api/tasks";
+import { getTasks, updateTask, deleteTask } from "../../lib/api/tasks";
 import { Task } from "@repo/db";
 import Drawer from "../components/Drawer";
 import TaskForm from "../components/TaskForm";
@@ -103,6 +103,18 @@ export default function TasksPage() {
   const handleFormSuccess = () => {
     handleCloseDrawer();
     fetchTasks();
+  };
+
+  const handleDeleteTask = async (e: React.MouseEvent, id: string, title: string) => {
+    e.stopPropagation();
+    if (window.confirm(`Are you sure you want to delete task "${title}"?`)) {
+      try {
+        await deleteTask(id);
+        fetchTasks();
+      } catch (err: any) {
+        alert(err.message || "Failed to delete task");
+      }
+    }
   };
 
   const columns = [
@@ -238,6 +250,14 @@ export default function TasksPage() {
                                 Acc: {task.account_id.substring(0, 6)}...
                               </span>
                             )}
+                          </div>
+                          <div className="mt-2 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              className="px-2 py-0.5 border border-red-200 rounded text-[10px] font-semibold text-red-600 hover:bg-red-50 cursor-pointer transition-colors bg-white"
+                              onClick={(e) => handleDeleteTask(e, task.id, task.title)}
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { getBids } from "../../lib/api/bids";
+import { getBids, deleteBid } from "../../lib/api/bids";
 import Drawer from "../components/Drawer";
 import BidForm from "../components/BidForm";
 import { DeadlineBadge, RagBadge, daysUntil } from "../components/ui-utils";
@@ -41,6 +41,17 @@ export default function BidsPage() {
   const handleFormSuccess = () => {
     handleCloseDrawer();
     fetchBids();
+  };
+
+  const handleDeleteBid = async (id: string) => {
+    if (window.confirm("Are you sure you want to delete this bid?")) {
+      try {
+        await deleteBid(id);
+        fetchBids();
+      } catch (err: any) {
+        alert(err.message || "Failed to delete bid");
+      }
+    }
   };
 
   return (
@@ -146,6 +157,12 @@ export default function BidsPage() {
                             onClick={() => handleOpenDrawer(bid)}
                           >
                             Edit
+                          </button>
+                          <button
+                            className="px-2.5 py-1 border border-red-200 rounded text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer transition-colors bg-white"
+                            onClick={() => handleDeleteBid(bid.id)}
+                          >
+                            Delete
                           </button>
                         </div>
                       </td>

@@ -32,3 +32,12 @@ export async function updateBid(id: string, updates: Partial<Bid>): Promise<Bid>
   if (error) throw error;
   return data;
 }
+
+export async function deleteBid(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("bids")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}

@@ -144,6 +144,10 @@ DO $$ BEGIN
 EXCEPTION WHEN others THEN null; END $$;
 
 DO $$ BEGIN
+    CREATE POLICY "Allow public delete on accounts" ON accounts FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
     DROP POLICY IF EXISTS "Allow authenticated read on opportunities" ON opportunities;
     DROP POLICY IF EXISTS "Allow authenticated insert on opportunities" ON opportunities;
     DROP POLICY IF EXISTS "Allow authenticated update on opportunities" ON opportunities;
@@ -151,6 +155,10 @@ DO $$ BEGIN
     CREATE POLICY "Allow public insert on opportunities" ON opportunities FOR INSERT WITH CHECK (true);
     CREATE POLICY "Allow public update on opportunities" ON opportunities FOR UPDATE USING (true);
 EXCEPTION WHEN others THEN null; END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Allow public delete on opportunities" ON opportunities FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
 
 
 -- Repeat basic public policies for other tables
@@ -162,6 +170,10 @@ DO $$ BEGIN
 EXCEPTION WHEN others THEN null; END $$;
 
 DO $$ BEGIN
+    CREATE POLICY "Allow public delete on opportunity_state_history" ON opportunity_state_history FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
     DROP POLICY IF EXISTS "Allow authenticated read on bids" ON bids;
     DROP POLICY IF EXISTS "Allow authenticated insert on bids" ON bids;
     DROP POLICY IF EXISTS "Allow authenticated update on bids" ON bids;
@@ -171,6 +183,10 @@ DO $$ BEGIN
 EXCEPTION WHEN others THEN null; END $$;
 
 DO $$ BEGIN
+    CREATE POLICY "Allow public delete on bids" ON bids FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
+DO $$ BEGIN
     DROP POLICY IF EXISTS "Allow authenticated read on tasks" ON tasks;
     DROP POLICY IF EXISTS "Allow authenticated insert on tasks" ON tasks;
     DROP POLICY IF EXISTS "Allow authenticated update on tasks" ON tasks;
@@ -178,6 +194,11 @@ DO $$ BEGIN
     CREATE POLICY "Allow public insert on tasks" ON tasks FOR INSERT WITH CHECK (true);
     CREATE POLICY "Allow public update on tasks" ON tasks FOR UPDATE USING (true);
 EXCEPTION WHEN others THEN null; END $$;
+
+DO $$ BEGIN
+    CREATE POLICY "Allow public delete on tasks" ON tasks FOR DELETE USING (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+
 
 -- 6. Storage Buckets (if storage schema exists)
 INSERT INTO storage.buckets (id, name, public) VALUES ('proposals', 'proposals', false) ON CONFLICT DO NOTHING;

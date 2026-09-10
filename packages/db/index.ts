@@ -333,7 +333,28 @@ class MockQueryChain {
     try {
       let result = [...this.data];
 
-      if (this.filters.length > 0) {
+      if (this.operation === "delete") {
+        const allDataStr = localStorage.getItem(`mock_db_${this.table}`);
+        const allData = allDataStr ? JSON.parse(allDataStr) : [];
+        
+        let newAllData: any[];
+        if (this.filters.length === 0) {
+          newAllData = [];
+        } else {
+          newAllData = allData.filter((item: any) => {
+            let match = true;
+            for (const filter of this.filters) {
+              if (String(item[filter.field]) !== String(filter.value)) {
+                match = false;
+              }
+            }
+            return !match;
+          });
+        }
+        
+        localStorage.setItem(`mock_db_${this.table}`, JSON.stringify(newAllData));
+        result = [];
+      } else if (this.filters.length > 0) {
         if (this.operation === "update") {
           const allDataStr = localStorage.getItem(`mock_db_${this.table}`);
           const allData = allDataStr ? JSON.parse(allDataStr) : [];
@@ -355,22 +376,6 @@ class MockQueryChain {
           
           localStorage.setItem(`mock_db_${this.table}`, JSON.stringify(newAllData));
           result = updatedItem ? [updatedItem] : [];
-        } else if (this.operation === "delete") {
-          const allDataStr = localStorage.getItem(`mock_db_${this.table}`);
-          const allData = allDataStr ? JSON.parse(allDataStr) : [];
-          
-          const newAllData = allData.filter((item: any) => {
-            let match = true;
-            for (const filter of this.filters) {
-              if (item[filter.field] !== filter.value) {
-                match = false;
-              }
-            }
-            return !match;
-          });
-          
-          localStorage.setItem(`mock_db_${this.table}`, JSON.stringify(newAllData));
-          result = [];
         } else {
           result = result.filter(item => {
             for (const filter of this.filters) {
