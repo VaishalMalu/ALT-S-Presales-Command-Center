@@ -25,7 +25,7 @@ if (typeof window !== "undefined" && !localStorage.getItem("mock_db_seeded")) {
       id: "acc-1",
       name: "Acme Corporation",
       industry: "Technology",
-      region: "North America",
+      region: "UAE",
       health_score: 92,
       ai_health_prediction: "Stable growth expected. Key renewal coming up in 6 months.",
       tier: "Tier 1",
@@ -44,7 +44,7 @@ if (typeof window !== "undefined" && !localStorage.getItem("mock_db_seeded")) {
       id: "acc-2",
       name: "Globex Corporation",
       industry: "Manufacturing",
-      region: "Europe",
+      region: "KSA",
       health_score: 78,
       ai_health_prediction: "At risk due to recent organizational changes. Engagement required.",
       tier: "Tier 2",
@@ -63,7 +63,7 @@ if (typeof window !== "undefined" && !localStorage.getItem("mock_db_seeded")) {
       id: "acc-3",
       name: "Initech LLC",
       industry: "Finance",
-      region: "Asia Pacific",
+      region: "GCC",
       health_score: 85,
       ai_health_prediction: "Highly positive sentiment. Strong expansion opportunity in Southeast Asia.",
       tier: "Tier 1",
@@ -584,6 +584,7 @@ export interface OpportunityStateHistory {
 export interface Account {
   id: string;
   name: string;
+  owner: string | null;
   industry: string | null;
   region: string | null;
   health_score: number | null;

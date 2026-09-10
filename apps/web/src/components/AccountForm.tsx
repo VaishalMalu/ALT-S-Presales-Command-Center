@@ -46,6 +46,7 @@ export default function AccountForm({
     if (!submitData.phone_number) submitData.phone_number = null;
     if (!submitData.industry) submitData.industry = null;
     if (!submitData.region) submitData.region = null;
+    if (!submitData.owner) submitData.owner = null;
 
     try {
       if (initialData?.id) {
@@ -147,6 +148,19 @@ export default function AccountForm({
         />
       </div>
 
+      <div>
+        <label className="block text-xs font-semibold text-gray-500 mb-1">
+          Owner
+        </label>
+        <input
+          name="owner"
+          value={formData.owner || ""}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
+          placeholder="e.g. John Smith"
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
@@ -183,14 +197,11 @@ export default function AccountForm({
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
           >
             <option value="">Select Region</option>
-            <option value="North America">North America</option>
-            <option value="Europe">Europe</option>
-            <option value="Asia Pacific">Asia Pacific</option>
-            <option value="Latin America">Latin America</option>
-            <option value="Middle East & Africa">Middle East & Africa</option>
-            <option value="India">India</option>
+            <option value="KSA">KSA (Saudi Arabia)</option>
             <option value="UAE">UAE</option>
-            <option value="Global">Global</option>
+            <option value="GCC">GCC</option>
+            <option value="Africa">Africa</option>
+            <option value="RoW">RoW (Rest of the World)</option>
           </select>
         </div>
       </div>

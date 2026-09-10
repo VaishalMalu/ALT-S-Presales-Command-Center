@@ -199,7 +199,7 @@ export default function AccountsPage() {
                           </button>
                         </td>
                       )}
-                      {col("owner")           && <td className="px-4 py-3 text-xs">{acc.created_by ? "User" : "—"}</td>}
+                      {col("owner")           && <td className="px-4 py-3 text-xs">{acc.owner || "—"}</td>}
                       {col("tier")            && <td className="px-4 py-3">{acc.tier || "—"}</td>}
                       {col("country")         && <td className="px-4 py-3">{acc.country || "—"}</td>}
                       {col("industry")        && <td className="px-4 py-3">{acc.industry || "—"}</td>}

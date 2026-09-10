@@ -48,6 +48,7 @@ EXCEPTION WHEN duplicate_object THEN null; END $$;
 CREATE TABLE IF NOT EXISTS accounts (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name VARCHAR(255) NOT NULL,
+    owner VARCHAR(255),
     industry VARCHAR(100),
     region VARCHAR(100),
     health_score INTEGER CHECK (health_score >= 0 AND health_score <= 100),
