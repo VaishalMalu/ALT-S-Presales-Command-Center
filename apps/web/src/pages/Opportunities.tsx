@@ -13,8 +13,8 @@ import { useCurrency } from "../contexts/CurrencyContext";
 import ViewManager, { ColumnDef } from "../components/ViewManager";
 
 const ALL_COLUMNS: ColumnDef[] = [
-  { key: "account",     label: "Account Name",  defaultVisible: true },
   { key: "opp_id",      label: "Opp ID",       defaultVisible: true },
+  { key: "account",     label: "Account Name",  defaultVisible: true },
   { key: "title",       label: "Opportunity",   defaultVisible: true },
   { key: "driven_by",   label: "Driven By",     defaultVisible: true },
   { key: "bid_type",    label: "Bid Type",      defaultVisible: true },
@@ -222,8 +222,8 @@ export default function OpportunitiesPage() {
             <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
               <thead className="bg-gray-50 text-gray-600 border-b border-border sticky top-0">
                 <tr>
-                  {col("account")     && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Account Name</th>}
                   {col("opp_id")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opp ID</th>}
+                  {col("account")     && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Account Name</th>}
                   {col("title")       && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opportunity</th>}
                   {col("driven_by")   && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Driven By</th>}
                   {col("bid_type")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Bid Type</th>}
@@ -252,15 +252,6 @@ export default function OpportunitiesPage() {
                       key={opp.id}
                       className={`hover:bg-gray-50 transition-colors ${isActive ? "bg-blue-50/30" : ""}`}
                     >
-                      {col("account") && (
-                        <td className="px-4 py-3 font-medium text-gray-700">
-                          {accName ? (
-                            <span className="max-w-[160px] truncate block">{accName}</span>
-                          ) : (
-                            <span className="text-gray-400 italic">—</span>
-                          )}
-                        </td>
-                      )}
                       {col("opp_id") && (
                         <td className="px-4 py-3 font-bold text-gray-800">
                           <button
@@ -269,6 +260,15 @@ export default function OpportunitiesPage() {
                           >
                             {oppDisplayId}
                           </button>
+                        </td>
+                      )}
+                      {col("account") && (
+                        <td className="px-4 py-3 font-medium text-gray-700">
+                          {accName ? (
+                            <span className="max-w-[160px] truncate block">{accName}</span>
+                          ) : (
+                            <span className="text-gray-400 italic">—</span>
+                          )}
                         </td>
                       )}
                       {col("title") && (
