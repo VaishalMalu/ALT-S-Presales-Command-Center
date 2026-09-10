@@ -74,3 +74,12 @@ export async function updateAccount(id: string, updates: Partial<Account>): Prom
 
   return data;
 }
+
+export async function deleteAccount(id: string): Promise<void> {
+  const { error } = await supabase
+    .from("accounts")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
+}

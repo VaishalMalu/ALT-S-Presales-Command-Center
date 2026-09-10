@@ -3,6 +3,7 @@ import { Opportunity, Account, supabase } from "@repo/db";
 import {
   createOpportunity,
   updateOpportunity,
+  deleteOpportunity,
 } from "../../lib/api/opportunities";
 import { getAccounts } from "../../lib/api/accounts";
 import { useCurrency } from "../contexts/CurrencyContext";
@@ -196,6 +197,20 @@ export default function OpportunityForm({
       </div>
     );
   }
+
+  const handleDelete = async () => {
+    if (!initialData?.id) return;
+    if (window.confirm(`Are you sure you want to delete opportunity "${initialData.title}"?`)) {
+      setLoading(true);
+      try {
+        await deleteOpportunity(initialData.id);
+        onSuccess();
+      } catch (err: any) {
+        setError(err.message || "Failed to delete opportunity");
+        setLoading(false);
+      }
+    }
+  };
 
   return (
     <form id="opportunity-form" onSubmit={handleSubmit} className="space-y-4">
@@ -567,22 +582,36 @@ export default function OpportunityForm({
         </div>
       )}
 
-      <div className="flex gap-2 justify-end mt-6">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={loading}
-          className="px-4 py-2 border border-border rounded-md text-sm text-muted hover:bg-gray-50"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={loading}
-          className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-opacity-90 disabled:opacity-50"
-        >
-          {loading ? "Saving..." : "Save Opportunity"}
-        </button>
+      <div className="flex gap-2 justify-between items-center mt-6 border-t border-gray-100 pt-4">
+        {initialData?.id ? (
+          <button
+            type="button"
+            onClick={handleDelete}
+            disabled={loading}
+            className="px-3 py-2 border border-red-200 text-red-600 rounded-md text-xs font-semibold hover:bg-red-50 disabled:opacity-50 cursor-pointer"
+          >
+            Delete Opportunity
+          </button>
+        ) : (
+          <div />
+        )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="px-4 py-2 border border-border rounded-md text-sm text-muted hover:bg-gray-50 cursor-pointer"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-4 py-2 bg-primary text-white rounded-md text-sm hover:bg-opacity-90 disabled:opacity-50 cursor-pointer"
+          >
+            {loading ? "Saving..." : "Save Opportunity"}
+          </button>
+        </div>
       </div>
     </form>
   );

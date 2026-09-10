@@ -377,7 +377,7 @@ export default function Layout() {
         </header>
 
         {/* Main Content scrollable area */}
-        <main className="flex-1 overflow-auto p-4 sm:p-6 bg-gray-50/30">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50/30">
           <Outlet />
         </main>
       </div>
