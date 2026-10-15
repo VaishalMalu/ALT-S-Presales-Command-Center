@@ -18,25 +18,9 @@ export async function getAuditLogs(): Promise<AuditLog[]> {
       .select("*")
       .order("created_at", { ascending: false });
 
-    if (!error && data && data.length > 0) {
-      return data;
-    }
-
-    // If empty or error in mock mode, check localStorage fallback
-    if (typeof window !== "undefined") {
-      const raw = localStorage.getItem("mock_db_audit_logs");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.sort(
-            (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-          );
-        }
-      }
-    }
-
     if (error) {
       console.warn("Could not fetch audit logs:", error.message);
+      return [];
     }
     return data || [];
   } catch (err) {
@@ -70,16 +54,8 @@ export async function createAuditLog(log: AuditLog): Promise<void> {
     };
 
     const { error } = await supabase.from("audit_logs").insert([newLog]);
-
     if (error) {
       console.warn("Could not insert audit log into database:", error.message);
-      // Fallback save to localStorage in browser environment
-      if (typeof window !== "undefined") {
-        const raw = localStorage.getItem("mock_db_audit_logs");
-        const list = raw ? JSON.parse(raw) : [];
-        list.unshift({ ...newLog, id: Math.random().toString(36).substring(2, 11) });
-        localStorage.setItem("mock_db_audit_logs", JSON.stringify(list));
-      }
     }
   } catch (err: any) {
     console.error("Error creating audit log:", err);

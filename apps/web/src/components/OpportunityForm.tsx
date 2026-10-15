@@ -37,19 +37,48 @@ export default function OpportunityForm({
   const [customPartners, setCustomPartners] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
-
-  // Bid Type dropdown constraint state
   const [hasWonOpportunity, setHasWonOpportunity] = useState(false);
+  const [dbEntities, setDbEntities] = useState<string[]>([]);
+  const [dbPartners, setDbPartners] = useState<string[]>([]);
 
-  // Partner options populated from existing partner data and custom partners
+  useEffect(() => {
+    async function loadOptions() {
+      try {
+        const { data, error } = await supabase
+          .from("opportunities")
+          .select("driven_by, partner_name");
+        if (!error && data) {
+          const entities = new Set<string>();
+          const partners = new Set<string>();
+          data.forEach((d: any) => {
+            if (d.driven_by && d.driven_by.trim()) entities.add(d.driven_by.trim());
+            if (d.partner_name && d.partner_name.trim()) partners.add(d.partner_name.trim());
+          });
+          setDbEntities(Array.from(entities));
+          setDbPartners(Array.from(partners));
+        }
+      } catch (err) {
+        console.error("Error loading entities/partners:", err);
+      }
+    }
+    loadOptions();
+  }, []);
+
+  const entityOptions = React.useMemo(() => {
+    const set = new Set([...dbEntities, ...customEntities]);
+    if (formData.driven_by && formData.driven_by.trim()) {
+      set.add(formData.driven_by.trim());
+    }
+    return Array.from(set).sort();
+  }, [dbEntities, customEntities, formData.driven_by]);
+
   const partnerList = React.useMemo(() => {
-    const defaults = ["ALT-S", "Infodrive Analytics", "Sifratech", "Clover Infotech"];
-    const set = new Set([...defaults, ...customPartners]);
+    const set = new Set([...dbPartners, ...customPartners]);
     if (formData.partner_name && formData.partner_name.trim()) {
       set.add(formData.partner_name.trim());
     }
-    return Array.from(set);
-  }, [customPartners, formData.partner_name]);
+    return Array.from(set).sort();
+  }, [dbPartners, customPartners, formData.partner_name]);
 
   // Local state for actions with completed indicator support
   interface ActionItem {
@@ -386,11 +415,7 @@ export default function OpportunityForm({
           className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
         >
           <option value="">Select...</option>
-          <option value="ALT-S">ALT-S</option>
-          <option value="Infodrive Analytics">Infodrive Analytics</option>
-          <option value="Sifratech">Sifratech</option>
-          <option value="Clover Infotech">Clover Infotech</option>
-          {customEntities.map((entity) => (
+          {entityOptions.map((entity) => (
             <option key={entity} value={entity}>
               {entity}
             </option>
