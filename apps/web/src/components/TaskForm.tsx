@@ -20,9 +20,9 @@ export default function TaskForm({
   const [formData, setFormData] = useState<Partial<Task>>(
     initialData || {
       title: "",
-      status: "Not Started",
-      priority: "Medium",
-      category: "Presales Management",
+      status: "" as any,
+      priority: "" as any,
+      category: "",
     },
   );
   const [loading, setLoading] = useState(false);
@@ -43,6 +43,27 @@ export default function TaskForm({
     e.preventDefault();
     setLoading(true);
     setError(null);
+
+    if (!formData.title?.trim()) {
+      setError("Please enter a task title");
+      setLoading(false);
+      return;
+    }
+    if (!formData.category) {
+      setError("Please select a Category");
+      setLoading(false);
+      return;
+    }
+    if (!formData.priority) {
+      setError("Please select a Priority");
+      setLoading(false);
+      return;
+    }
+    if (!formData.status) {
+      setError("Please select a Status");
+      setLoading(false);
+      return;
+    }
 
     try {
       if (initialData?.id) {
@@ -79,13 +100,14 @@ export default function TaskForm({
 
       <div>
         <label className="block text-xs font-semibold text-gray-500 mb-1">
-          Task Title
+          Task Title <span className="text-red-500">*</span>
         </label>
         <input
           required
           name="title"
           value={formData.title || ""}
           onChange={handleChange}
+          placeholder="Enter task title..."
           className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm"
         />
       </div>
@@ -93,14 +115,16 @@ export default function TaskForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
-            Category
+            Category <span className="text-red-500">*</span>
           </label>
           <select
+            required
             name="category"
-            value={formData.category || "Presales Management"}
+            value={formData.category || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
           >
+            <option value="">Select Category...</option>
             <option value="Presales Management">Presales Management</option>
             <option value="Bid Management">Bid Management</option>
             <option value="Account Management">Account Management</option>
@@ -109,14 +133,16 @@ export default function TaskForm({
         </div>
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
-            Priority
+            Priority <span className="text-red-500">*</span>
           </label>
           <select
+            required
             name="priority"
-            value={formData.priority || "Medium"}
+            value={formData.priority || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
           >
+            <option value="">Select Priority...</option>
             <option value="Critical">Critical</option>
             <option value="High">High</option>
             <option value="Medium">Medium</option>
@@ -128,14 +154,16 @@ export default function TaskForm({
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-gray-500 mb-1">
-            Status
+            Status <span className="text-red-500">*</span>
           </label>
           <select
+            required
             name="status"
-            value={formData.status || "Not Started"}
+            value={formData.status || ""}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white"
           >
+            <option value="">Select Status...</option>
             <option value="Not Started">Not Started</option>
             <option value="In Progress">In Progress</option>
             <option value="Waiting Customer">Waiting Customer</option>

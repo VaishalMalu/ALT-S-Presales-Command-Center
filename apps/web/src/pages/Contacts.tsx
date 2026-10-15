@@ -1,22 +1,30 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { getContacts, deleteContact } from "../../lib/api/contacts";
+import { getAccounts } from "../../lib/api/accounts";
+import { Account, Contact } from "@repo/db";
 import Drawer from "../components/Drawer";
 import ContactForm from "../components/ContactForm";
-import { RagBadge } from "../components/ui-utils";
+import { exportToCSV } from "../components/ui-utils";
 
 export default function ContactsPage() {
-  const [contacts, setContacts] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingContact, setEditingContact] = useState<any | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
 
-  const fetchContacts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await getContacts();
-      setContacts(data);
+      const [contactsData, accountsData] = await Promise.all([
+        getContacts(),
+        getAccounts(),
+      ]);
+      setContacts(contactsData);
+      setAccounts(accountsData);
     } catch (err: any) {
       setError(err.message || "Failed to load contacts");
     } finally {
@@ -25,10 +33,36 @@ export default function ContactsPage() {
   }, []);
 
   useEffect(() => {
-    fetchContacts();
-  }, [fetchContacts]);
+    fetchData();
+  }, [fetchData]);
 
-  const handleOpenDrawer = (contact?: any) => {
+  const accountMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    accounts.forEach((acc) => {
+      map[acc.id] = acc.name;
+    });
+    return map;
+  }, [accounts]);
+
+  const filteredContacts = useMemo(() => {
+    if (!searchTerm.trim()) return contacts;
+    const term = searchTerm.toLowerCase();
+    return contacts.filter((c) => {
+      const accName = c.account_id ? (accountMap[c.account_id] || "") : "";
+      const fullName = `${c.first_name || ""} ${c.last_name || ""}`.toLowerCase();
+      return (
+        fullName.includes(term) ||
+        (c.email && c.email.toLowerCase().includes(term)) ||
+        (c.phone && c.phone.toLowerCase().includes(term)) ||
+        (c.role && c.role.toLowerCase().includes(term)) ||
+        (c.designation && c.designation.toLowerCase().includes(term)) ||
+        (c.department && c.department.toLowerCase().includes(term)) ||
+        accName.toLowerCase().includes(term)
+      );
+    });
+  }, [contacts, searchTerm, accountMap]);
+
+  const handleOpenDrawer = (contact?: Contact) => {
     setEditingContact(contact || null);
     setIsDrawerOpen(true);
   };
@@ -40,14 +74,14 @@ export default function ContactsPage() {
 
   const handleFormSuccess = () => {
     handleCloseDrawer();
-    fetchContacts();
+    fetchData();
   };
 
   const handleDeleteContact = async (id: string, name: string) => {
     if (window.confirm(`Are you sure you want to delete contact "${name}"?`)) {
       try {
         await deleteContact(id);
-        fetchContacts();
+        fetchData();
       } catch (err: any) {
         alert(err.message || "Failed to delete contact");
       }
@@ -67,24 +101,26 @@ export default function ContactsPage() {
         </div>
         <button
           onClick={() => handleOpenDrawer()}
-          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow-sm font-medium text-sm"
+          className="bg-primary text-white px-4 py-2 rounded-md hover:bg-opacity-90 transition-colors shadow-sm font-medium text-sm cursor-pointer"
         >
           + New Contact
         </button>
       </div>
 
       <div className="bg-white border border-border rounded-lg shadow-sm overflow-hidden">
-        <div className="p-4 border-b border-border flex justify-between bg-gray-50/50">
+        <div className="p-4 border-b border-border flex flex-wrap gap-3 justify-between items-center bg-gray-50/50">
           <input
             type="text"
             placeholder="Search contacts..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="border border-border rounded-md px-3 py-1.5 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
           <div className="flex space-x-2">
-            <button className="border border-border px-3 py-1.5 rounded-md text-sm hover:bg-gray-100 font-medium text-gray-700 transition-colors">
-              Filter
-            </button>
-            <button className="border border-border px-3 py-1.5 rounded-md text-sm hover:bg-gray-100 font-medium text-gray-700 transition-colors">
+            <button
+              onClick={() => exportToCSV(filteredContacts, "contacts_export.csv")}
+              className="border border-border px-3 py-1.5 rounded-md text-sm hover:bg-gray-100 font-medium text-gray-700 transition-colors cursor-pointer"
+            >
               Export
             </button>
           </div>
@@ -96,13 +132,13 @@ export default function ContactsPage() {
           </div>
         ) : error ? (
           <div className="p-12 text-center text-danger">{error}</div>
-        ) : contacts.length === 0 ? (
+        ) : filteredContacts.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <div className="mb-2 text-lg font-medium text-gray-700">
               No Contacts Found
             </div>
             <p className="text-sm">
-              Get started by adding your first customer contact.
+              {searchTerm ? "No contacts match your search." : "Get started by adding your first customer contact."}
             </p>
           </div>
         ) : (
@@ -134,7 +170,11 @@ export default function ContactsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {contacts.map((contact) => {
+                {filteredContacts.map((contact) => {
+                  const accountName = contact.account_id
+                    ? accountMap[contact.account_id] || (contact as any).accounts?.name || "—"
+                    : (contact as any).accounts?.name || "—";
+
                   return (
                     <tr
                       key={contact.id}
@@ -144,47 +184,53 @@ export default function ContactsPage() {
                         {contact.first_name} {contact.last_name}
                       </td>
                       <td className="px-4 py-3 text-secondary font-medium text-xs">
-                        {contact.accounts?.name || "—"}
+                        <span className="font-semibold text-gray-800">{accountName}</span>
                       </td>
                       <td className="px-4 py-3">
-                        <RagBadge
-                          status={
-                            contact.role === "Decision Maker"
-                              ? "Critical"
-                              : contact.role === "Influencer"
-                                ? "Medium"
-                                : "Green"
-                          }
-                        />
-                        <span className="ml-2 text-xs text-gray-500">
-                          {contact.role}
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+                          contact.role === "Decision Maker"
+                            ? "bg-purple-50 text-purple-700 border-purple-200 font-semibold"
+                            : contact.role === "Sponsor"
+                            ? "bg-blue-50 text-blue-700 border-blue-200 font-semibold"
+                            : contact.role?.includes("Influencer")
+                            ? "bg-amber-50 text-amber-700 border-amber-200"
+                            : "bg-gray-50 text-gray-700 border-gray-200"
+                        }`}>
+                          {contact.role || "Contact"}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-4 py-3 text-gray-600 font-mono text-xs">
                         {contact.email || "—"}
                       </td>
-                      <td className="px-4 py-3 text-gray-600">
+                      <td className="px-4 py-3 text-gray-600 text-xs">
                         {contact.phone || "—"}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="text-gray-800">
+                        <div className="text-gray-800 font-medium">
                           {contact.designation || "—"}
                         </div>
-                        <div className="text-xs text-gray-500">
-                          {contact.department || ""}
-                        </div>
+                        {contact.department && (
+                          <div className="text-xs text-gray-400">
+                            {contact.department}
+                          </div>
+                        )}
                       </td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-1.5">
                           <button
-                            className="px-2.5 py-1 border border-border rounded text-xs font-semibold text-primary hover:bg-primary/5 transition-colors bg-white"
+                            className="px-2 py-1 border border-border rounded text-xs font-semibold text-primary hover:bg-gray-100 cursor-pointer transition-colors bg-white"
                             onClick={() => handleOpenDrawer(contact)}
                           >
                             Edit
                           </button>
                           <button
-                            className="px-2.5 py-1 border border-red-200 rounded text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer transition-colors bg-white"
-                            onClick={() => handleDeleteContact(contact.id, `${contact.first_name} ${contact.last_name}`)}
+                            className="px-2 py-1 border border-red-200 rounded text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer transition-colors bg-white"
+                            onClick={() =>
+                              handleDeleteContact(
+                                contact.id,
+                                `${contact.first_name} ${contact.last_name}`
+                              )
+                            }
                           >
                             Delete
                           </button>

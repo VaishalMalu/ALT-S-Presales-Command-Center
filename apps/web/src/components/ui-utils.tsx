@@ -52,6 +52,10 @@ export function RagBadge({ status }: { status?: string | null }) {
     // Opportunity Stages
     "Closed Won": green,
     "Closed Lost": red,
+    "Proposal/RFP Submitted": amber,
+    "Customer Qualification": blue,
+    "Solution Design": blue,
+    "Lead Created": blue,
     Negotiation: amber,
     Decision: amber,
     "Proposal Submission": amber,
@@ -70,7 +74,13 @@ export function RagBadge({ status }: { status?: string | null }) {
   );
 }
 
-export function DeadlineBadge({ dateStr }: { dateStr?: string | null }) {
+export function DeadlineBadge({
+  dateStr,
+  isClosed,
+}: {
+  dateStr?: string | null;
+  isClosed?: boolean;
+}) {
   if (!dateStr) {
     return (
       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-50 text-gray-700 border border-gray-200">
@@ -86,26 +96,45 @@ export function DeadlineBadge({ dateStr }: { dateStr?: string | null }) {
     year: "numeric",
   });
 
+  // If opportunity or RFP is already closed or completed, do not show as overdue
+  if (isClosed) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-gray-700 text-xs font-semibold">{formattedDate}</span>
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 border border-gray-200">
+          Closed
+        </span>
+      </div>
+    );
+  }
+
   const days = daysUntil(dateStr);
   if (days === null) {
     return <span className="text-gray-700 text-xs font-semibold">{formattedDate}</span>;
   }
 
-  let badgeColor = "bg-green-50 text-green-700 border border-green-200";
-  let label = `${days}d left`;
-
+  // Only considered Overdue when the current date has passed its actual deadline (days < 0)
   if (days < 0) {
-    badgeColor = "bg-red-50 text-red-700 border border-red-200";
-    label = `${Math.abs(days)}d overdue`;
-  } else if (days <= 7) {
-    badgeColor = "bg-red-50 text-red-700 border border-red-200";
-    label = `${days}d left`;
-  } else if (days <= 14) {
+    return (
+      <div className="flex items-center gap-2">
+        <span className="text-gray-700 text-xs font-semibold">{formattedDate}</span>
+        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-50 text-red-700 border border-red-200">
+          {Math.abs(days)}d overdue
+        </span>
+      </div>
+    );
+  }
+
+  // Until the deadline date is reached, it remains active / on-time
+  let badgeColor = "bg-green-50 text-green-700 border border-green-200";
+  let label = days === 0 ? "Due today" : `${days}d left`;
+
+  if (days === 0) {
     badgeColor = "bg-amber-50 text-amber-700 border border-amber-200";
-    label = `${days}d left`;
+  } else if (days <= 7) {
+    badgeColor = "bg-amber-50 text-amber-700 border border-amber-200";
   } else {
-    badgeColor = "bg-gray-50 text-gray-600 border border-gray-200";
-    label = `${days}d`;
+    badgeColor = "bg-green-50 text-green-700 border border-green-200";
   }
 
   return (

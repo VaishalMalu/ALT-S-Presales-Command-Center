@@ -223,10 +223,20 @@ export default function TasksPage() {
                           }`}
                         >
                           <div className="flex justify-between items-start mb-2">
-                            <RagBadge status={task.priority} />
-                            <DeadlineBadge dateStr={task.due_date} />
+                            <div className="flex items-center gap-1.5">
+                              <RagBadge status={task.priority} />
+                              {task.status === "Completed" && (
+                                <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-green-700 bg-green-50 px-1.5 py-0.5 rounded border border-green-200">
+                                  ✓ Done
+                                </span>
+                              )}
+                            </div>
+                            <DeadlineBadge
+                              dateStr={task.due_date}
+                              isClosed={task.status === "Completed"}
+                            />
                           </div>
-                          <div className="font-semibold text-gray-900 mt-1 mb-1.5 leading-snug group-hover:text-blue-700 transition-colors">
+                          <div className={`font-semibold mt-1 mb-1.5 leading-snug group-hover:text-blue-700 transition-colors ${task.status === "Completed" ? "text-gray-500 line-through" : "text-gray-900"}`}>
                             {task.title}
                           </div>
                           <div className="text-xs text-gray-500 mb-3 flex items-center gap-1.5">

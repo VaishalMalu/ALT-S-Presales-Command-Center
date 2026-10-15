@@ -34,21 +34,47 @@ export default function OpportunityForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [customEntities, setCustomEntities] = useState<string[]>([]);
+  const [customPartners, setCustomPartners] = useState<string[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isCreatingAccount, setIsCreatingAccount] = useState(false);
 
   // Bid Type dropdown constraint state
   const [hasWonOpportunity, setHasWonOpportunity] = useState(false);
 
-  // Local state for actions
-  const [actions, setActions] = useState<{ action: string; date: string }[]>(() => {
+  // Partner options populated from existing partner data and custom partners
+  const partnerList = React.useMemo(() => {
+    const defaults = ["ALT-S", "Infodrive Analytics", "Sifratech", "Clover Infotech"];
+    const set = new Set([...defaults, ...customPartners]);
+    if (formData.partner_name && formData.partner_name.trim()) {
+      set.add(formData.partner_name.trim());
+    }
+    return Array.from(set);
+  }, [customPartners, formData.partner_name]);
+
+  // Local state for actions with completed indicator support
+  interface ActionItem {
+    action: string;
+    date: string;
+    completed?: boolean;
+  }
+
+  const [actions, setActions] = useState<ActionItem[]>(() => {
     if (initialData?.next_steps) {
       try {
         const parsed = JSON.parse(initialData.next_steps);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.map((item: any) => {
+            if (typeof item === "string") return { action: item, date: "", completed: false };
+            return {
+              action: item.action || "",
+              date: item.date || "",
+              completed: Boolean(item.completed),
+            };
+          });
+        }
       } catch (e) {
         if (initialData.next_steps.trim() !== "") {
-          return [{ action: initialData.next_steps, date: "" }];
+          return [{ action: initialData.next_steps, date: "", completed: false }];
         }
       }
     }
@@ -89,15 +115,24 @@ export default function OpportunityForm({
 
   const handleAddAction = () => {
     if (!newActionText.trim()) return;
-    const newAction = {
+    const newAction: ActionItem = {
       action: newActionText.trim(),
       date: newActionDate || new Date().toISOString().split("T")[0],
+      completed: false,
     };
     const updated = [...actions, newAction];
     setActions(updated);
     setFormData((prev) => ({ ...prev, next_steps: JSON.stringify(updated) }));
     setNewActionText("");
     setNewActionDate("");
+  };
+
+  const handleToggleActionComplete = (idx: number) => {
+    const updated = actions.map((act, i) =>
+      i === idx ? { ...act, completed: !act.completed } : act
+    );
+    setActions(updated);
+    setFormData((prev) => ({ ...prev, next_steps: JSON.stringify(updated) }));
   };
 
   const handleRemoveAction = (idx: number) => {
@@ -217,6 +252,7 @@ export default function OpportunityForm({
       <AIFormToolbar formType="Opportunity" formData={formData} setFormData={setFormData} />
       {error && <div className="text-danger text-sm mb-4">{error}</div>}
 
+      {/* 1. Opportunity ID */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
           Opportunity ID
@@ -224,15 +260,17 @@ export default function OpportunityForm({
         <input
           disabled
           value={initialData?.id || "Auto-assigned on save"}
-          className="w-full px-3 py-2 border border-border rounded-md text-sm bg-gray-50 text-gray-500"
+          className="w-full px-3 py-2 border border-border rounded-md text-sm bg-gray-50 text-gray-500 font-mono"
         />
       </div>
 
+      {/* 2. Account */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
-          Account Name
+          Account <span className="text-red-500">*</span>
         </label>
         <select
+          required
           name="account_id"
           value={formData.account_id || ""}
           onChange={(e) => {
@@ -244,7 +282,7 @@ export default function OpportunityForm({
           }}
           className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
         >
-          <option value="">Select...</option>
+          <option value="">Select Account...</option>
           {accounts.map((acc) => (
             <option key={acc.id} value={acc.id}>
               {acc.name}
@@ -256,19 +294,74 @@ export default function OpportunityForm({
         </select>
       </div>
 
+      {/* 3. Received Date */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
-          Opportunity Name
+          Received Date
+        </label>
+        <input
+          type="date"
+          name="received_date"
+          value={
+            formData.received_date
+              ? formData.received_date.split("T")[0]
+              : ""
+          }
+          onChange={handleChange}
+          className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
+        />
+      </div>
+
+      {/* 4. Partner Name */}
+      <div>
+        <label className="block text-xs font-semibold text-muted mb-1">
+          Partner Name
+        </label>
+        <select
+          name="partner_name"
+          value={formData.partner_name || ""}
+          onChange={(e) => {
+            if (e.target.value === "__add_new_partner__") {
+              const newPartner = window.prompt("Enter new Partner name:");
+              if (newPartner && newPartner.trim() !== "") {
+                const trimmed = newPartner.trim();
+                setCustomPartners((prev) => [...prev, trimmed]);
+                setFormData((prev) => ({ ...prev, partner_name: trimmed }));
+              }
+            } else {
+              handleChange(e);
+            }
+          }}
+          className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
+        >
+          <option value="">Select Partner...</option>
+          {partnerList.map((partner) => (
+            <option key={partner} value={partner}>
+              {partner}
+            </option>
+          ))}
+          <option value="__add_new_partner__" className="font-semibold text-primary">
+            + Add New Partner...
+          </option>
+        </select>
+      </div>
+
+      {/* 5. Opportunity Name */}
+      <div>
+        <label className="block text-xs font-semibold text-muted mb-1">
+          Opportunity Name <span className="text-red-500">*</span>
         </label>
         <input
           required
           name="title"
           value={formData.title || ""}
           onChange={handleChange}
+          placeholder="e.g. Enterprise Cloud Migration"
           className="w-full px-3 py-2 border border-border rounded-md text-sm"
         />
       </div>
 
+      {/* 6. Driven By (Entity) */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
           Driven By (Entity)
@@ -308,6 +401,7 @@ export default function OpportunityForm({
         </select>
       </div>
 
+      {/* 7. Bid Type & Opportunity Type */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">
@@ -352,6 +446,7 @@ export default function OpportunityForm({
         </div>
       </div>
 
+      {/* 8. Stage & Priority */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">
@@ -359,7 +454,11 @@ export default function OpportunityForm({
           </label>
           <select
             name="stage"
-            value={formData.stage || "Lead Created"}
+            value={
+              formData.stage === "Proposal Submission"
+                ? "Proposal/RFP Submitted"
+                : (formData.stage || "Lead Created")
+            }
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md text-sm bg-white"
           >
@@ -368,7 +467,7 @@ export default function OpportunityForm({
               Customer Qualification
             </option>
             <option value="Solution Design">Solution Design</option>
-            <option value="Proposal Submission">
+            <option value="Proposal/RFP Submitted">
               Proposal/RFP Submitted
             </option>
             <option value="Closed Won">Closed Won</option>
@@ -392,6 +491,7 @@ export default function OpportunityForm({
         </div>
       </div>
 
+      {/* 9. Owner */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
           Owner
@@ -404,6 +504,7 @@ export default function OpportunityForm({
         />
       </div>
 
+      {/* 10. Deal Value & Probability */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">
@@ -443,6 +544,7 @@ export default function OpportunityForm({
         </div>
       </div>
 
+      {/* 11. Pre-Bid Kick-off Date & Clarification Deadline */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-semibold text-muted mb-1">
@@ -478,6 +580,7 @@ export default function OpportunityForm({
         </div>
       </div>
 
+      {/* 12. RFP / Submission Deadline */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
           RFP / Submission Deadline
@@ -491,6 +594,7 @@ export default function OpportunityForm({
         />
       </div>
 
+      {/* 13. Competitors */}
       <div>
         <label className="block text-xs font-semibold text-muted mb-1">
           Competitors
@@ -503,23 +607,59 @@ export default function OpportunityForm({
         />
       </div>
 
-      {/* Next Steps dynamic actions with dates list */}
+      {/* 14. Next Steps / Action Items with Completed Indicator */}
       <div className="border-t border-gray-100 pt-4">
-        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">
-          Next Steps / Action Items
-        </label>
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+            Next Steps / Action Items
+          </label>
+          {actions.length > 0 && (
+            <span className="text-[11px] text-gray-500">
+              {actions.filter((a) => a.completed).length} of {actions.length} completed
+            </span>
+          )}
+        </div>
         
         {actions.length > 0 ? (
           <div className="space-y-2 mb-3">
             {actions.map((act, idx) => (
-              <div key={idx} className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-md p-2 text-xs">
-                <div className="flex-1 min-w-0 pr-2">
-                  <p className="font-semibold text-gray-800 break-words">{act.action}</p>
-                  {act.date && (
-                    <p className="text-[10px] text-gray-400 mt-0.5">
-                      Target Date: {new Date(act.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                    </p>
-                  )}
+              <div
+                key={idx}
+                className={`flex items-center justify-between p-2.5 rounded-md border text-xs transition-colors ${
+                  act.completed
+                    ? "bg-green-50/60 border-green-200 text-gray-700"
+                    : "bg-gray-50 border-gray-200"
+                }`}
+              >
+                <div className="flex items-start gap-2.5 flex-1 min-w-0 pr-2">
+                  <input
+                    type="checkbox"
+                    checked={act.completed || false}
+                    onChange={() => handleToggleActionComplete(idx)}
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 cursor-pointer"
+                    title={act.completed ? "Mark as Incomplete" : "Mark as Completed"}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p
+                        className={`font-semibold break-words m-0 ${
+                          act.completed ? "line-through text-gray-500" : "text-gray-800"
+                        }`}
+                      >
+                        {act.action}
+                      </p>
+                      {act.completed && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-green-100 text-green-800 border border-green-300">
+                          <span>✓</span> Completed
+                        </span>
+                      )}
+                    </div>
+                    {act.date && (
+                      <p className="text-[10px] text-gray-400 mt-0.5 m-0">
+                        Target Date: {new Date(act.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <button
                   type="button"

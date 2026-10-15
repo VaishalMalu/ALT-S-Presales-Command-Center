@@ -282,4 +282,26 @@ DO $$ BEGIN
     ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS pre_bid_kickoff_date TIMESTAMPTZ;
     ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS clarification_deadline TIMESTAMPTZ;
     ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS win_loss_reason TEXT;
+    ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS received_date TIMESTAMPTZ;
+    ALTER TABLE opportunities ADD COLUMN IF NOT EXISTS partner_name VARCHAR(255);
 EXCEPTION WHEN duplicate_column THEN null; END $$;
+
+-- Audit Logs Table
+CREATE TABLE IF NOT EXISTS audit_logs (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    entity_type VARCHAR(100) NOT NULL,
+    entity_id VARCHAR(255) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    changed_by VARCHAR(255),
+    changes JSONB,
+    entity_name VARCHAR(255),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
+
+DO $$ BEGIN
+    CREATE POLICY "Allow public read on audit_logs" ON audit_logs FOR SELECT USING (true);
+    CREATE POLICY "Allow public insert on audit_logs" ON audit_logs FOR INSERT WITH CHECK (true);
+EXCEPTION WHEN duplicate_object THEN null; END $$;
+

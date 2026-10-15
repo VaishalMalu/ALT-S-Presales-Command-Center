@@ -282,12 +282,163 @@ if (typeof window !== "undefined" && !localStorage.getItem("mock_db_seeded")) {
     }
   ];
 
+  const seedAuditLogs = [
+    {
+      id: "aud-1",
+      entity_type: "Opportunity",
+      entity_id: "opp-1",
+      action_type: "CREATE",
+      changed_by: "alex.johnson@alt-s.com",
+      entity_name: "Acme Enterprise Cloud Migration",
+      changes: { title: "Acme Enterprise Cloud Migration", stage: "Solution Design", deal_value: 150000 },
+      created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: "aud-2",
+      entity_type: "Account",
+      entity_id: "acc-1",
+      action_type: "CREATE",
+      changed_by: "admin@alt-s.com",
+      entity_name: "Acme Corporation",
+      changes: { name: "Acme Corporation", tier: "Tier 1", arr: 250000 },
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: "aud-3",
+      entity_type: "Opportunity",
+      entity_id: "opp-2",
+      action_type: "CREATE",
+      changed_by: "sarah.lee@alt-s.com",
+      entity_name: "Globex Smart Factory IoT Implementation",
+      changes: { title: "Globex Smart Factory IoT Implementation", stage: "Customer Qualification", deal_value: 95000 },
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+    },
+    {
+      id: "aud-4",
+      entity_type: "Opportunity",
+      entity_id: "opp-3",
+      action_type: "UPDATE",
+      changed_by: "alex.johnson@alt-s.com",
+      entity_name: "Initech Core Banking Platform Upgrade",
+      changes: { stage: { old: "Solution Design", new: "Proposal/RFP Submitted" } },
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ];
+
   localStorage.setItem("mock_db_accounts", JSON.stringify(seedAccounts));
   localStorage.setItem("mock_db_opportunities", JSON.stringify(seedOpportunities));
   localStorage.setItem("mock_db_contacts", JSON.stringify(seedContacts));
   localStorage.setItem("mock_db_bids", JSON.stringify(seedBids));
   localStorage.setItem("mock_db_tasks", JSON.stringify(seedTasks));
+  localStorage.setItem("mock_db_audit_logs", JSON.stringify(seedAuditLogs));
   localStorage.setItem("mock_db_seeded", "true");
+}
+
+// Safety check: ensure contacts and audit logs are initialized even if mock_db_seeded was previously set
+if (typeof window !== "undefined") {
+  if (!localStorage.getItem("mock_db_audit_logs") || JSON.parse(localStorage.getItem("mock_db_audit_logs") || "[]").length === 0) {
+    const fallbackAuditLogs = [
+      {
+        id: "aud-1",
+        entity_type: "Opportunity",
+        entity_id: "opp-1",
+        action_type: "CREATE",
+        changed_by: "alex.johnson@alt-s.com",
+        entity_name: "Acme Enterprise Cloud Migration",
+        changes: { title: "Acme Enterprise Cloud Migration", stage: "Solution Design", deal_value: 150000 },
+        created_at: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "aud-2",
+        entity_type: "Account",
+        entity_id: "acc-1",
+        action_type: "CREATE",
+        changed_by: "admin@alt-s.com",
+        entity_name: "Acme Corporation",
+        changes: { name: "Acme Corporation", tier: "Tier 1", arr: 250000 },
+        created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "aud-3",
+        entity_type: "Opportunity",
+        entity_id: "opp-2",
+        action_type: "CREATE",
+        changed_by: "sarah.lee@alt-s.com",
+        entity_name: "Globex Smart Factory IoT Implementation",
+        changes: { title: "Globex Smart Factory IoT Implementation", stage: "Customer Qualification", deal_value: 95000 },
+        created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "aud-4",
+        entity_type: "Opportunity",
+        entity_id: "opp-3",
+        action_type: "UPDATE",
+        changed_by: "alex.johnson@alt-s.com",
+        entity_name: "Initech Core Banking Platform Upgrade",
+        changes: { stage: { old: "Solution Design", new: "Proposal/RFP Submitted" } },
+        created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+    localStorage.setItem("mock_db_audit_logs", JSON.stringify(fallbackAuditLogs));
+  }
+
+  if (!localStorage.getItem("mock_db_contacts") || JSON.parse(localStorage.getItem("mock_db_contacts") || "[]").length === 0) {
+    const fallbackContacts = [
+      {
+        id: "con-1",
+        account_id: "acc-1",
+        first_name: "John",
+        last_name: "Doe",
+        email: "john.doe@acme.com",
+        phone: "+1-555-0199",
+        designation: "Chief Information Officer",
+        department: "Information Technology",
+        role: "Decision Maker",
+        created_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "con-2",
+        account_id: "acc-1",
+        first_name: "Jane",
+        last_name: "Smith",
+        email: "jane.smith@acme.com",
+        phone: "+1-555-0124",
+        designation: "VP of Engineering",
+        department: "Engineering",
+        role: "Technical Influencer",
+        created_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 28 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "con-3",
+        account_id: "acc-2",
+        first_name: "Robert",
+        last_name: "Paulson",
+        email: "r.paulson@globex.com",
+        phone: "+44-20-7946-0958",
+        designation: "Director of Operations",
+        department: "Operations",
+        role: "Sponsor",
+        created_at: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 24 * 24 * 60 * 60 * 1000).toISOString()
+      },
+      {
+        id: "con-4",
+        account_id: "acc-3",
+        first_name: "Peter",
+        last_name: "Gibbons",
+        email: "pgibbons@initech.com",
+        phone: "+65-6789-0123",
+        designation: "Head of Development",
+        department: "Engineering",
+        role: "Decision Maker",
+        created_at: new Date(Date.now() - 39 * 24 * 60 * 60 * 1000).toISOString(),
+        updated_at: new Date(Date.now() - 39 * 24 * 60 * 60 * 1000).toISOString()
+      }
+    ];
+    localStorage.setItem("mock_db_contacts", JSON.stringify(fallbackContacts));
+  }
 }
 
 // Mock Query Chain Classes for mock mode
@@ -506,6 +657,12 @@ const mockSupabase = {
         }
       };
     },
+    async getUser() {
+      if (typeof window === "undefined") return { data: { user: null }, error: null };
+      const sessionStr = localStorage.getItem("mock_supabase_session");
+      const session = sessionStr ? JSON.parse(sessionStr) : null;
+      return { data: { user: session?.user || null }, error: null };
+    },
     async signOut() {
       if (typeof window !== "undefined") {
         localStorage.removeItem("mock_supabase_session");
@@ -539,6 +696,7 @@ export type OpportunityStage =
   | "Commercial Proposal"
   | "Internal Approval Workflow"
   | "Proposal Submission"
+  | "Proposal/RFP Submitted"
   | "Customer Clarification"
   | "Negotiation"
   | "Decision"
@@ -561,6 +719,8 @@ export interface Opportunity {
   stage: OpportunityStage;
   ai_win_prediction: number | null;
   deadline: string | null;
+  received_date?: string | null;
+  partner_name?: string | null;
   pre_bid_kickoff_date: string | null;
   clarification_deadline: string | null;
   driven_by: string | null;

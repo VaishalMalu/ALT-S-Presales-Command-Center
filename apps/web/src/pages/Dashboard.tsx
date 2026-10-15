@@ -64,7 +64,9 @@ export default function DashboardPage() {
     today.setHours(0, 0, 0, 0);
     const checkOverdue = (dateStr?: string | null) => {
       if (!dateStr) return false;
-      return new Date(dateStr) < today;
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      return d.getTime() < today.getTime();
     };
 
     opportunities.forEach((o) => {
@@ -101,9 +103,9 @@ export default function DashboardPage() {
     today.setHours(0, 0, 0, 0);
     const getDays = (dateStr?: string | null) => {
       if (!dateStr) return null;
-      return Math.round(
-        (new Date(dateStr).getTime() - today.getTime()) / 86400000,
-      );
+      const d = new Date(dateStr);
+      d.setHours(0, 0, 0, 0);
+      return Math.round((d.getTime() - today.getTime()) / 86400000);
     };
 
     opportunities.forEach((o) => {
@@ -151,12 +153,21 @@ export default function DashboardPage() {
     "Lead Created",
     "Customer Qualification",
     "Solution Design",
-    "Proposal Submission",
+    "Proposal/RFP Submitted",
     "Closed Won",
     "Closed Lost",
   ];
   const stageCounts = stageLabels.map(
-    (label) => opportunities.filter((o) => o.stage === label).length,
+    (label) =>
+      opportunities.filter((o) => {
+        if (label === "Proposal/RFP Submitted") {
+          return (
+            o.stage === "Proposal/RFP Submitted" ||
+            (o.stage as string) === "Proposal Submission"
+          );
+        }
+        return o.stage === label;
+      }).length,
   );
 
   const stageChartData = {

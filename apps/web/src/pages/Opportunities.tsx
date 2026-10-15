@@ -13,20 +13,22 @@ import { useCurrency } from "../contexts/CurrencyContext";
 import ViewManager, { ColumnDef } from "../components/ViewManager";
 
 const ALL_COLUMNS: ColumnDef[] = [
-  { key: "opp_id",      label: "Opp ID",       defaultVisible: true },
-  { key: "account",     label: "Account Name",  defaultVisible: true },
-  { key: "title",       label: "Opportunity",   defaultVisible: true },
-  { key: "driven_by",   label: "Driven By",     defaultVisible: true },
-  { key: "bid_type",    label: "Bid Type",      defaultVisible: true },
-  { key: "type",        label: "Opp Type",      defaultVisible: true },
-  { key: "stage",       label: "Stage",         defaultVisible: true },
-  { key: "priority",    label: "Priority",      defaultVisible: true },
-  { key: "deal_value",  label: "Deal Value",    defaultVisible: true },
-  { key: "probability", label: "Prob.",         defaultVisible: true },
-  { key: "weighted",    label: "Weighted",      defaultVisible: true },
-  { key: "deadline",    label: "Deadline",      defaultVisible: true },
-  { key: "owner",       label: "Owner",         defaultVisible: false },
-  { key: "competitors", label: "Competitors",   defaultVisible: false },
+  { key: "opp_id",        label: "Opp ID",         defaultVisible: true },
+  { key: "account",       label: "Account Name",    defaultVisible: true },
+  { key: "received_date", label: "Received Date",   defaultVisible: true },
+  { key: "partner_name",  label: "Partner Name",    defaultVisible: true },
+  { key: "title",         label: "Opportunity",     defaultVisible: true },
+  { key: "driven_by",     label: "Driven By",       defaultVisible: true },
+  { key: "bid_type",      label: "Bid Type",        defaultVisible: true },
+  { key: "type",          label: "Opp Type",        defaultVisible: true },
+  { key: "stage",         label: "Stage",           defaultVisible: true },
+  { key: "priority",      label: "Priority",        defaultVisible: true },
+  { key: "deal_value",    label: "Deal Value",      defaultVisible: true },
+  { key: "probability",   label: "Prob.",           defaultVisible: true },
+  { key: "weighted",      label: "Weighted",        defaultVisible: true },
+  { key: "deadline",      label: "Deadline",        defaultVisible: true },
+  { key: "owner",         label: "Owner",           defaultVisible: false },
+  { key: "competitors",   label: "Competitors",     defaultVisible: false },
 ];
 
 const DEFAULT_VISIBLE = new Set(
@@ -69,8 +71,29 @@ export default function OpportunitiesPage() {
 
   const filteredOpportunities = useMemo(() => {
     return opportunities.filter((opp) => {
-      // Stage filter
-      if (stageFilter !== "ALL" && opp.stage !== stageFilter) return false;
+      // Stage filter supporting exact stage names and legacy synonyms
+      if (stageFilter !== "ALL") {
+        if (stageFilter === "Proposal/RFP Submitted") {
+          if (
+            opp.stage !== "Proposal/RFP Submitted" &&
+            (opp.stage as string) !== "Proposal Submission" &&
+            (opp.stage as string) !== "Proposal/RFP"
+          ) {
+            return false;
+          }
+        } else if (stageFilter === "Customer Qualification") {
+          if (
+            opp.stage !== "Customer Qualification" &&
+            (opp.stage as string) !== "Qualification" &&
+            (opp.stage as string) !== "Customer Requirement Analysis"
+          ) {
+            return false;
+          }
+        } else if (opp.stage !== stageFilter) {
+          return false;
+        }
+      }
+
       // Priority filter
       if (priorityFilter !== "ALL" && opp.priority !== priorityFilter) return false;
 
@@ -84,6 +107,7 @@ export default function OpportunitiesPage() {
         oppDisplayId.includes(term) ||
         (opp.title && opp.title.toLowerCase().includes(term)) ||
         (opp.id && opp.id.toLowerCase().includes(term)) ||
+        (opp.partner_name && opp.partner_name.toLowerCase().includes(term)) ||
         (opp.stage && opp.stage.toLowerCase().includes(term)) ||
         (opp.driven_by && opp.driven_by.toLowerCase().includes(term)) ||
         (opp.owner && opp.owner.toLowerCase().includes(term)) ||
@@ -176,10 +200,9 @@ export default function OpportunitiesPage() {
             >
               <option value="ALL">All Stages</option>
               <option value="Lead Created">Lead Created</option>
-              <option value="Qualification">Qualification</option>
-              <option value="Proposal/RFP">Proposal/RFP</option>
-              <option value="Technical Evaluation">Technical Evaluation</option>
-              <option value="Negotiation">Negotiation</option>
+              <option value="Customer Qualification">Customer Qualification</option>
+              <option value="Solution Design">Solution Design</option>
+              <option value="Proposal/RFP Submitted">Proposal/RFP Submitted</option>
               <option value="Closed Won">Closed Won</option>
               <option value="Closed Lost">Closed Lost</option>
             </select>
@@ -222,27 +245,30 @@ export default function OpportunitiesPage() {
             <table className="w-full text-left border-collapse text-sm whitespace-nowrap">
               <thead className="bg-gray-50 text-gray-600 border-b border-border sticky top-0">
                 <tr>
-                  {col("opp_id")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opp ID</th>}
-                  {col("account")     && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Account Name</th>}
-                  {col("title")       && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opportunity</th>}
-                  {col("driven_by")   && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Driven By</th>}
-                  {col("bid_type")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Bid Type</th>}
-                  {col("type")        && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opp Type</th>}
-                  {col("stage")       && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Stage</th>}
-                  {col("priority")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Priority</th>}
-                  {col("deal_value")  && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Deal Value</th>}
-                  {col("probability") && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Prob.</th>}
-                  {col("weighted")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Weighted</th>}
-                  {col("deadline")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Deadline</th>}
-                  {col("owner")       && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Owner</th>}
-                  {col("competitors") && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Competitors</th>}
+                  {col("opp_id")        && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opp ID</th>}
+                  {col("account")       && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Account Name</th>}
+                  {col("received_date") && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Received Date</th>}
+                  {col("partner_name")  && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Partner Name</th>}
+                  {col("title")         && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opportunity</th>}
+                  {col("driven_by")     && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Driven By</th>}
+                  {col("bid_type")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Bid Type</th>}
+                  {col("type")          && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Opp Type</th>}
+                  {col("stage")         && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Stage</th>}
+                  {col("priority")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Priority</th>}
+                  {col("deal_value")    && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Deal Value</th>}
+                  {col("probability")   && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Prob.</th>}
+                  {col("weighted")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Weighted</th>}
+                  {col("deadline")      && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Deadline</th>}
+                  {col("owner")         && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Owner</th>}
+                  {col("competitors")   && <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Competitors</th>}
                   <th className="px-4 py-3 font-semibold uppercase tracking-wider text-[11px]">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filteredOpportunities.map((opp) => {
                   const weighted = (Number(opp.deal_value) || 0) * (Number(opp.probability) || 0);
-                  const isActive = opp.stage !== "Closed Won" && opp.stage !== "Closed Lost";
+                  const isClosed = opp.stage === "Closed Won" || opp.stage === "Closed Lost";
+                  const isActive = !isClosed;
                   const accName = opp.account_id ? accountMap[opp.account_id] : null;
                   const seqNum = oppSeqMap[opp.id] ?? 0;
                   const oppDisplayId = `OPP${String(seqNum).padStart(6, "0")}`;
@@ -266,6 +292,30 @@ export default function OpportunitiesPage() {
                         <td className="px-4 py-3 font-medium text-gray-700">
                           {accName ? (
                             <span className="max-w-[160px] truncate block">{accName}</span>
+                          ) : (
+                            <span className="text-gray-400 italic">—</span>
+                          )}
+                        </td>
+                      )}
+                      {col("received_date") && (
+                        <td className="px-4 py-3 text-xs text-gray-600">
+                          {opp.received_date ? (
+                            new Date(opp.received_date).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          ) : (
+                            <span className="text-gray-400 italic">—</span>
+                          )}
+                        </td>
+                      )}
+                      {col("partner_name") && (
+                        <td className="px-4 py-3 text-xs font-medium text-gray-700">
+                          {opp.partner_name ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                              {opp.partner_name}
+                            </span>
                           ) : (
                             <span className="text-gray-400 italic">—</span>
                           )}
@@ -296,7 +346,11 @@ export default function OpportunitiesPage() {
                       {col("deal_value")  && <td className="px-4 py-3 font-mono">{formatMoney(opp.deal_value)}</td>}
                       {col("probability") && <td className="px-4 py-3 font-mono">{Math.round((Number(opp.probability) || 0) * 100)}%</td>}
                       {col("weighted")    && <td className="px-4 py-3 font-mono font-medium">{formatMoney(weighted)}</td>}
-                      {col("deadline")    && <td className="px-4 py-3"><DeadlineBadge dateStr={opp.deadline} /></td>}
+                      {col("deadline")    && (
+                        <td className="px-4 py-3">
+                          <DeadlineBadge dateStr={opp.deadline} isClosed={isClosed} />
+                        </td>
+                      )}
                       {col("owner")       && <td className="px-4 py-3 text-xs">{opp.owner || "—"}</td>}
                       {col("competitors") && <td className="px-4 py-3 text-xs max-w-[160px] truncate">{opp.competitors || "—"}</td>}
                       <td className="px-4 py-3">
